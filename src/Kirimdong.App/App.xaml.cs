@@ -18,6 +18,21 @@ public partial class App : Application
     /// </summary>
     protected override void OnStartup(StartupEventArgs e)
     {
+        // Helper modes: no window, no single-instance lock.
+        if (e.Args.Length >= 1 && e.Args[0] == "--fix-firewall")
+        {
+            Shutdown(Services.ConnectionCheck.Fix());
+            return;
+        }
+        if (e.Args.Length >= 2 && e.Args[0] == "--diagnose")
+        {
+            var report = Services.ConnectionCheck.Run();
+            System.IO.File.WriteAllText(e.Args[1], System.Text.Json.JsonSerializer.Serialize(report,
+                new System.Text.Json.JsonSerializerOptions { WriteIndented = true, Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() } }));
+            Shutdown(0);
+            return;
+        }
+
         string? profile = null;
         int? port = null;
         for (var i = 0; i < e.Args.Length - 1; i++)

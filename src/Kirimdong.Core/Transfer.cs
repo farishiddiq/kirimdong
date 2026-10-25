@@ -36,6 +36,10 @@ public sealed class Transfer
     /// <summary>Where received items landed (top-level files and folders).</summary>
     public IReadOnlyList<string> SavedPaths { get; internal set; } = Array.Empty<string>();
     public string? SaveFolder { get; internal set; }
+    /// <summary>Device id of the other PC, when known (always for received parcels).</summary>
+    public string? PeerId { get; internal set; }
+    /// <summary>For parcels dropped on the sender's screen-edge portal: which edge of the sender's screen.</summary>
+    public string? Edge { get; internal set; }
 
     public long TransferredBytes => Interlocked.Read(ref _transferred);
     public CancellationToken Token => _cts.Token;

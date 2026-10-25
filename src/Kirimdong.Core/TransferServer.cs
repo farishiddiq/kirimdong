@@ -9,7 +9,7 @@ public sealed record IncomingOffer(Transfer Transfer, Offer Offer, IPAddress Fro
 /// <summary>Accepts parcels from other PCs and writes them into the save folder.</summary>
 public sealed class TransferServer : IDisposable
 {
-    private const int BufferSize = 1024 * 1024;
+    private const int SocketBuffer = 4 * 1024 * 1024;
     private const int MaxFiles = 200_000;
     public static readonly TimeSpan DecisionTimeout = TimeSpan.FromMinutes(2);
     private const string PartSuffix = ".kdpart";
@@ -29,6 +29,9 @@ public sealed class TransferServer : IDisposable
 
     /// <summary>Raised as soon as an offer arrives (before the decision), so the UI can list it.</summary>
     public event Action<Transfer>? TransferStarted;
+
+    /// <summary>Another PC introduced itself over TCP (it found us by scanning, or was added by IP).</summary>
+    public event Action<Hello, IPAddress>? HelloReceived;
 
     public int Port { get; private set; }
 
@@ -57,7 +60,7 @@ public sealed class TransferServer : IDisposable
     private async Task HandleAsync(TcpClient client, CancellationToken serverToken)
     {
         using var _ = client;
-        client.ReceiveBufferSize = BufferSize;
+        client.ReceiveBufferSize = SocketBuffer;
         var from = (client.Client.RemoteEndPoint as IPEndPoint)?.Address ?? IPAddress.None;
         var stream = client.GetStream();
         byte kind;
@@ -70,6 +73,15 @@ public sealed class TransferServer : IDisposable
             {
                 await Protocol.WriteFrameAsync(stream, _identity(), headerTimeout.Token).ConfigureAwait(false);
                 await stream.FlushAsync(headerTimeout.Token).ConfigureAwait(false);
+                return;
+            }
+            if (kind == Protocol.KindHello)
+            {
+                var caller = await Protocol.ReadFrameAsync<Hello>(stream, headerTimeout.Token).ConfigureAwait(false);
+                await Protocol.WriteFrameAsync(stream, _identity(), headerTimeout.Token).ConfigureAwait(false);
+                await stream.FlushAsync(headerTimeout.Token).ConfigureAwait(false);
+                if (!string.IsNullOrWhiteSpace(caller.Id) && caller.Port is > 0 and < 65536)
+                    HelloReceived?.Invoke(caller with { Name = Protocol.CleanName(caller.Name) }, from);
                 return;
             }
             if (kind != Protocol.KindOffer) return;
@@ -94,7 +106,11 @@ public sealed class TransferServer : IDisposable
 
         var plan = ReceivePlan.Create(offer);
         var transfer = new Transfer(TransferDirection.Receive, Protocol.CleanName(offer.SenderName),
-            offer.TotalBytes, offer.Files.Count, Transfer.Describe(plan.TopLevelNames, offer.Files.Count));
+            offer.TotalBytes, offer.Files.Count, Transfer.Describe(plan.TopLevelNames, offer.Files.Count))
+        {
+            PeerId = offer.SenderId,
+            Edge = offer.Edge,
+        };
         TransferStarted?.Invoke(transfer);
         await ReceiveAsync(client, stream, offer, plan, transfer, from, serverToken).ConfigureAwait(false);
     }
@@ -144,7 +160,7 @@ public sealed class TransferServer : IDisposable
             await Protocol.WriteByteAsync(stream, 1, ct).ConfigureAwait(false);
             transfer.SetState(TransferState.Running);
 
-            var buffer = new byte[BufferSize];
+            var pump = new Pump();
             var expectedHash = new byte[Protocol.HashLength];
             foreach (var item in offer.Files)
             {
@@ -153,18 +169,14 @@ public sealed class TransferServer : IDisposable
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!);
                 partPath = target + PartSuffix;
                 using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-                await using (var output = new FileStream(partPath, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize))
+                await using (var output = new FileStream(partPath, new FileStreamOptions
+                             {
+                                 Mode = FileMode.Create, Access = FileAccess.Write, Share = FileShare.None,
+                                 BufferSize = 0, Options = FileOptions.Asynchronous,
+                                 PreallocationSize = item.Size, // one contiguous allocation instead of growing block by block
+                             }))
                 {
-                    var remaining = item.Size;
-                    while (remaining > 0)
-                    {
-                        var read = await stream.ReadAsync(buffer.AsMemory(0, (int)Math.Min(buffer.Length, remaining)), ct).ConfigureAwait(false);
-                        if (read == 0) throw new EndOfStreamException();
-                        hash.AppendData(buffer, 0, read);
-                        await output.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
-                        remaining -= read;
-                        transfer.AddBytes(read);
-                    }
+                    await pump.CopyAsync(stream, output, item.Size, hash, n => transfer.AddBytes(n), ct).ConfigureAwait(false);
                 }
                 await stream.ReadExactlyAsync(expectedHash, ct).ConfigureAwait(false);
                 if (!CryptographicOperations.FixedTimeEquals(hash.GetHashAndReset(), expectedHash))

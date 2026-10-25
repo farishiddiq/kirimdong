@@ -12,7 +12,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <Product>kirimdong</Product>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Company>farishiddiq</Company>
     <Copyright>Copyright (c) 2026 farishiddiq</Copyright>
   </PropertyGroup>

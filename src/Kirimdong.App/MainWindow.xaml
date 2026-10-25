@@ -12,9 +12,37 @@
   </WindowChrome.WindowChrome>
 
   <Window.Resources>
+    <c:EdgeBrush x:Key="EdgeFill" />
+    <c:EdgeBrush x:Key="EdgeGlyph" Glyph="True" />
+
+    <!-- One of four arrows on a peer label: which edge of this screen leads to that PC. -->
+    <Style x:Key="EdgeButton" TargetType="Button">
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Margin" Value="4,0,0,0" />
+      <Setter Property="FontFamily" Value="{StaticResource Glyphs}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Opacity" Value="0.8" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
     <!-- A PC on the same Wi-Fi, as the address label of a parcel. Drop files on it to send. -->
     <DataTemplate x:Key="PeerLabel">
-      <Grid Width="300" Height="200" Margin="0,0,22,22" AllowDrop="True" Background="Transparent"
+      <Grid Width="300" Height="262" Margin="0,0,22,22" AllowDrop="True" Background="Transparent"
             DragEnter="Peer_DragEnter" DragOver="Peer_DragOver" DragLeave="Peer_DragLeave" Drop="Peer_Drop"
             RenderTransformOrigin="0.5,0.5">
         <Grid.RenderTransform><RotateTransform x:Name="tilt" Angle="0" /></Grid.RenderTransform>
@@ -31,10 +59,12 @@
           </EventTrigger>
         </Grid.Triggers>
         <c:PaperCard Fill="{DynamicResource PaperBrush}" Notch="12">
-          <Grid Margin="22,18,22,20">
+          <Grid Margin="22,16,22,16">
             <Grid.RowDefinitions>
               <RowDefinition Height="Auto" />
               <RowDefinition Height="*" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <DockPanel>
@@ -47,6 +77,27 @@
               <Button Style="{StaticResource InkButton}" Content="Pilih file" Click="PickFiles_Click" />
               <Button Style="{StaticResource KraftButton}" Content="Folder" Margin="8,0,0,0" Click="PickFolder_Click" />
             </StackPanel>
+            <DockPanel Grid.Row="3" Margin="0,14,0,0">
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Style="{StaticResource EdgeButton}" Tag="left" Content="&#xE76B;" Click="Edge_Click" ToolTip="PC ini ada di kiri layarmu"
+                        Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=left}"
+                        Foreground="{Binding Edge, Converter={StaticResource EdgeGlyph}, ConverterParameter=left}" />
+                <Button Style="{StaticResource EdgeButton}" Tag="top" Content="&#xE70E;" Click="Edge_Click" ToolTip="PC ini ada di atas layarmu"
+                        Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=top}"
+                        Foreground="{Binding Edge, Converter={StaticResource EdgeGlyph}, ConverterParameter=top}" />
+                <Button Style="{StaticResource EdgeButton}" Tag="bottom" Content="&#xE70D;" Click="Edge_Click" ToolTip="PC ini ada di bawah layarmu"
+                        Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=bottom}"
+                        Foreground="{Binding Edge, Converter={StaticResource EdgeGlyph}, ConverterParameter=bottom}" />
+                <Button Style="{StaticResource EdgeButton}" Tag="right" Content="&#xE76C;" Click="Edge_Click" ToolTip="PC ini ada di kanan layarmu"
+                        Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=right}"
+                        Foreground="{Binding Edge, Converter={StaticResource EdgeGlyph}, ConverterParameter=right}" />
+              </StackPanel>
+              <TextBlock Text="Tepi layar" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" VerticalAlignment="Center" />
+            </DockPanel>
+            <CheckBox Grid.Row="4" Style="{StaticResource Tick}" FontSize="13" Margin="0,10,0,0" IsChecked="{Binding IsTrusted, Mode=TwoWay}"
+                      ToolTip="Paket dari PC ini langsung disimpan tanpa kartu Terima/Tolak">
+              <TextBlock Text="Langsung terima dari PC ini" />
+            </CheckBox>
           </Grid>
         </c:PaperCard>
         <c:PaperCard Fill="{StaticResource Accent}" Notch="12" IsHitTestVisible="False"
@@ -163,7 +214,11 @@
               </StackPanel>
 
               <CheckBox x:Name="AutoAcceptBox" Style="{StaticResource Tick}" Margin="0,22,0,0" Checked="AutoAccept_Changed" Unchecked="AutoAccept_Changed">
-                <TextBlock Text="Langsung terima tanpa tanya" TextWrapping="Wrap" />
+                <TextBlock Text="Terima dari semua PC tanpa tanya" TextWrapping="Wrap" />
+              </CheckBox>
+              <CheckBox x:Name="PortalBox" Style="{StaticResource Tick}" Margin="0,12,0,0" Checked="Portal_Changed" Unchecked="Portal_Changed"
+                        ToolTip="Seret file ke tepi layar yang kamu pilih di label PC tujuan">
+                <TextBlock Text="Kirim lewat tepi layar" TextWrapping="Wrap" />
               </CheckBox>
             </StackPanel>
           </StackPanel>
@@ -176,7 +231,11 @@
         <!-- Add a PC by address, for networks that block broadcasts. -->
         <c:PaperCard Grid.Row="2" Fill="{DynamicResource KraftDarkBrush}" Notch="10">
           <StackPanel Margin="20,16,20,18">
-            <TextBlock Text="PC tidak muncul? Tambah lewat IP" FontSize="15" FontWeight="SemiBold" />
+            <DockPanel>
+              <Button DockPanel.Dock="Right" Style="{StaticResource WordButton}" Content="Cek koneksi" Click="CheckConnection_Click" VerticalAlignment="Center" />
+              <TextBlock Text="PC tidak muncul?" FontSize="15" FontWeight="SemiBold" />
+            </DockPanel>
+            <TextBlock Text="Tambah lewat IP" FontSize="13" Foreground="{StaticResource InkOnKraftMuted}" Margin="0,2,0,0" />
             <DockPanel Margin="0,10,0,0">
               <Button DockPanel.Dock="Right" Style="{StaticResource InkButton}" Content="Tambah" Click="AddByIp_Click" IsDefault="False" />
               <TextBox x:Name="IpBox" Style="{StaticResource Field}" Margin="0,0,8,0" KeyDown="IpBox_KeyDown" ToolTip="Contoh: 192.168.1.20" />
@@ -196,13 +255,26 @@
           <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DockPanel Margin="0,8,0,18">
-          <TextBlock x:Name="PeerCount" DockPanel.Dock="Right" FontSize="15" VerticalAlignment="Bottom" Foreground="{StaticResource InkOnKraftMuted}" />
-          <StackPanel>
-            <TextBlock Text="Kirim ke PC di Wi-Fi yang sama" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
-            <TextBlock Text="Seret file atau folder ke label tujuan, atau tekan Pilih file." FontSize="15" Margin="0,4,0,0" />
-          </StackPanel>
-        </DockPanel>
+        <StackPanel>
+          <!-- Shown when Windows Firewall keeps other PCs out: the usual reason two laptops cannot see each other. -->
+          <c:PaperCard x:Name="FirewallBanner" Fill="{StaticResource Accent}" Notch="10" Margin="0,0,10,14" Visibility="Collapsed">
+            <DockPanel Margin="20,14,16,14">
+              <Button x:Name="BannerButton" DockPanel.Dock="Right" Style="{StaticResource InkButton}" Content="Izinkan" Click="FixFirewall_Click"
+                      VerticalAlignment="Center" Margin="16,0,0,0" />
+              <StackPanel>
+                <TextBlock Text="PC lain belum bisa menghubungi PC ini" FontSize="17" FontWeight="SemiBold" />
+                <TextBlock x:Name="BannerText" FontSize="14" TextWrapping="Wrap" Margin="0,3,0,0" />
+              </StackPanel>
+            </DockPanel>
+          </c:PaperCard>
+          <DockPanel Margin="0,8,0,18">
+            <TextBlock x:Name="PeerCount" DockPanel.Dock="Right" FontSize="15" VerticalAlignment="Bottom" Foreground="{StaticResource InkOnKraftMuted}" />
+            <StackPanel>
+              <TextBlock Text="Kirim ke PC di Wi-Fi yang sama" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
+              <TextBlock x:Name="HowTo" Text="Seret file ke label tujuan, atau ke tepi layar yang dipilih di labelnya." FontSize="15" Margin="0,4,0,0" />
+            </StackPanel>
+          </DockPanel>
+        </StackPanel>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
           <ItemsControl x:Name="PeerList" ItemTemplate="{StaticResource PeerLabel}" Focusable="False">
@@ -238,7 +310,7 @@
               Buka kirimdong di PC lain yang tersambung ke Wi-Fi yang sama. Labelnya muncul di sini dalam beberapa detik.
             </TextBlock>
             <TextBlock FontSize="15" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="23">
-              Waktu pertama dibuka, Windows menanyakan izin firewall. Pilih Izinkan untuk jaringan Private, di kedua PC.
+              Masih kosong setelah PC lain dibuka? Tekan Cek koneksi di kiri bawah, di kedua PC.
             </TextBlock>
           </StackPanel>
         </Grid>
@@ -274,7 +346,10 @@
               </ItemsControl>
               <TextBlock x:Name="OfferMore" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
               <TextBlock x:Name="OfferFolder" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,12,0,0" TextTrimming="CharacterEllipsis" />
-              <DockPanel Margin="0,22,0,0">
+              <CheckBox x:Name="OfferTrust" Style="{StaticResource Tick}" FontSize="14" Margin="0,16,0,0">
+                <TextBlock x:Name="OfferTrustText" Text="Lain kali langsung terima dari PC ini" />
+              </CheckBox>
+              <DockPanel Margin="0,18,0,0">
                 <StackPanel Orientation="Horizontal">
                   <Button x:Name="AcceptButton" Style="{StaticResource InkButton}" Content="Terima" FontSize="17" Padding="26,11" Click="Accept_Click" />
                   <Button Style="{StaticResource KraftButton}" Content="Tolak" FontSize="17" Padding="22,11" Margin="10,0,0,0" Click="Decline_Click" />
@@ -289,6 +364,54 @@
           <c:Tape.RenderTransform><RotateTransform Angle="4" /></c:Tape.RenderTransform>
         </c:Tape>
       </Grid>
+    </Grid>
+
+    <!-- Connection check: what keeps two PCs apart, in plain words, and the one-click fix. -->
+    <Grid x:Name="CheckLayer" Grid.RowSpan="2" Background="{StaticResource Scrim}" Visibility="Collapsed">
+      <c:PaperCard Width="640" Fill="{DynamicResource PaperBrush}" Notch="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Margin="32,26,32,28">
+          <DockPanel>
+            <Button DockPanel.Dock="Right" Style="{StaticResource KraftButton}" Content="Tutup" Click="CloseCheck_Click" VerticalAlignment="Top" />
+            <TextBlock Text="Cek koneksi" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
+          </DockPanel>
+          <Grid Margin="0,18,0,0">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="110" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Jaringan" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,3,0,0" />
+            <TextBlock x:Name="CheckNetwork" Grid.Column="1" FontSize="15" TextWrapping="Wrap" />
+
+            <TextBlock Grid.Row="1" Text="Kecepatan" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
+            <TextBlock x:Name="CheckSpeed" Grid.Row="1" Grid.Column="1" FontSize="15" TextWrapping="Wrap" Margin="0,14,0,0" />
+
+            <TextBlock Grid.Row="2" Text="Firewall" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,14,0,0">
+              <TextBlock x:Name="CheckFirewall" FontSize="15" TextWrapping="Wrap" />
+              <Button x:Name="CheckFixButton" Style="{StaticResource InkButton}" Content="Izinkan kirimdong" HorizontalAlignment="Left"
+                      Margin="0,10,0,0" Click="FixFirewall_Click" />
+            </StackPanel>
+
+            <TextBlock Grid.Row="3" Text="Pencarian" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
+            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,14,0,0">
+              <TextBlock x:Name="CheckDiscovery" FontSize="15" TextWrapping="Wrap" />
+              <Button x:Name="SweepButton" Style="{StaticResource KraftButton}" Content="Pindai jaringan sekarang" HorizontalAlignment="Left"
+                      Margin="0,10,0,0" Click="Sweep_Click" />
+            </StackPanel>
+          </Grid>
+          <TextBlock FontSize="14" TextWrapping="Wrap" Margin="0,22,0,0" LineHeight="21" Foreground="{StaticResource InkOnPaperMuted}">
+            Lakukan cek ini di kedua PC. Kalau firewall keduanya sudah diizinkan tapi tetap tidak saling ketemu, router kemungkinan
+            memisahkan perangkat (client isolation, biasa di Wi-Fi tamu, kantor, atau kampus). Jalan pintasnya: nyalakan Mobile hotspot
+            di salah satu laptop (Settings → Network &amp; internet → Mobile hotspot) lalu sambungkan laptop lain ke hotspot itu.
+          </TextBlock>
+        </StackPanel>
+      </c:PaperCard>
     </Grid>
   </Grid>
 </Window>

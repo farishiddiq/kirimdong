@@ -6,6 +6,7 @@ using Kirimdong.Core;
 namespace Kirimdong.Core.Tests;
 
 /// <summary>Real sockets on loopback: a receiver and a sender in one process.</summary>
+[Trait("Category", "Network")]
 public sealed class TransferTests : IDisposable
 {
     private readonly string _work = Path.Combine(Path.GetTempPath(), "kirimdong-tests", Guid.NewGuid().ToString("N"));
@@ -217,6 +218,63 @@ public sealed class TransferTests : IDisposable
     }
 
     [Fact]
+    public async Task HelloIntroducesBothSides()
+    {
+        var learned = new TaskCompletionSource<(Hello, IPAddress)>();
+        using var server = StartServer((_, _) => Task.FromResult(true));
+        server.HelloReceived += (h, a) => learned.TrySetResult((h, a));
+
+        var answer = await TransferClient.HelloAsync(IPAddress.Loopback, server.Port, new Hello("caller", "Laptop A", 47801), TimeSpan.FromSeconds(2));
+        var (caller, from) = await learned.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        Assert.Equal("receiver-id", answer.Id);
+        Assert.Equal("caller", caller.Id);
+        Assert.Equal("Laptop A", caller.Name);
+        Assert.Equal(47801, caller.Port);
+        Assert.Equal(IPAddress.Loopback, from);
+    }
+
+    [Fact]
+    public async Task PortalEdgeTravelsWithTheParcel()
+    {
+        var received = new List<Transfer>();
+        using var server = StartServer((_, _) => Task.FromResult(true), received);
+        var batch = FileCollector.Collect(new[] { WriteFile("a.txt", 10, 13) });
+        var t = TransferClient.CreateTransfer("x", batch);
+        await TransferClient.SendAsync(new IPEndPoint(IPAddress.Loopback, server.Port), _sender, batch, t, edge: "right");
+
+        var incoming = await WaitFinished(() => received.SingleOrDefault());
+        Assert.Equal("right", incoming.Edge);
+        Assert.Equal("sender-id", incoming.PeerId);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(5_000_000)]
+    public async Task PumpCopiesExactlyAndHashes(int size)
+    {
+        var data = new byte[size];
+        new Random(size).NextBytes(data);
+        // A source that hands out odd-sized pieces, like a socket does.
+        var source = new TrickleStream(data, 7777);
+        var destination = new MemoryStream();
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        long reported = 0;
+        await new Pump().CopyAsync(source, destination, size, hash, n => reported += n, default);
+
+        Assert.Equal(data, destination.ToArray());
+        Assert.Equal(size, reported);
+        Assert.Equal(SHA256.HashData(data), hash.GetHashAndReset());
+    }
+
+    private sealed class TrickleStream(byte[] data, int piece) : MemoryStream(data)
+    {
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken ct = default) =>
+            base.ReadAsync(buffer[..Math.Min(buffer.Length, piece)], ct);
+    }
+
+    [Fact]
     public async Task UnreachablePeerFailsWithMessage()
     {
         var batch = FileCollector.Collect(new[] { WriteFile("a.bin", 10, 9) });
@@ -254,5 +312,39 @@ public class DiscoveryTests
         d.Handle(new Announcement(Protocol.AppTag, 1, Announcement.KindBye, "other", "Laptop Ani", 47801), IPAddress.Parse("192.168.1.9"));
         Assert.Empty(d.Peers);
         Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public void SubnetListsEveryHostButNetworkAndBroadcast()
+    {
+        var s = new DiscoveryService.Subnet(IPAddress.Parse("192.168.1.7"), IPAddress.Parse("255.255.255.0"));
+        var hosts = s.Hosts().ToList();
+        Assert.Equal(254, hosts.Count);
+        Assert.Equal(IPAddress.Parse("192.168.1.1"), hosts[0]);
+        Assert.Equal(IPAddress.Parse("192.168.1.254"), hosts[^1]);
+        Assert.Equal(IPAddress.Parse("192.168.1.255"), s.Broadcast);
+    }
+
+    [Fact]
+    public void LargeNetworksAreNotScanned()
+    {
+        var s = new DiscoveryService.Subnet(IPAddress.Parse("10.20.30.40"), IPAddress.Parse("255.255.0.0"));
+        Assert.Empty(s.Hosts());
+        var slash22 = new DiscoveryService.Subnet(IPAddress.Parse("10.0.5.9"), IPAddress.Parse("255.255.252.0"));
+        Assert.Equal(1022, slash22.Hosts().Count());
+    }
+
+    [Fact]
+    public async Task SweepFindsAReceiverOnLoopback()
+    {
+        // The real sweep scans LAN subnets on port 47801; here the TCP hello it relies on is checked end to end.
+        using var server = new TransferServer(() => new Hello("far", "PC Jauh", 0), () => Path.GetTempPath(), (_, _) => Task.FromResult(false));
+        server.Start(0);
+        using var d = new DiscoveryService(() => new Hello("me", "Saya", 1), port: 0);
+        var hello = await TransferClient.HelloAsync(IPAddress.Loopback, server.Port, new Hello("me", "Saya", 1), TimeSpan.FromSeconds(2));
+        d.AddManual(hello, IPAddress.Loopback);
+        var peer = Assert.Single(d.Peers);
+        Assert.True(peer.KeepAliveByPing);
+        Assert.Equal("PC Jauh", peer.Name);
     }
 }

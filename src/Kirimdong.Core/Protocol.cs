@@ -8,8 +8,10 @@ namespace Kirimdong.Core;
 /// <summary>
 /// Wire format shared by sender and receiver.
 ///
-/// TCP connection:  "KDNG" | version (1 byte) | kind (1 byte: 'P' ping, 'O' offer)
+/// TCP connection:  "KDNG" | version (1 byte) | kind (1 byte: 'P' ping, 'H' hello, 'O' offer)
 ///   ping  → receiver answers with a <see cref="Hello"/> frame and closes.
+///   hello → caller sends its own <see cref="Hello"/> frame first, then gets the receiver's; both learn of each other
+///           (how PCs find each other when UDP broadcasts do not get through).
 ///   offer → sender writes an <see cref="Offer"/> frame; receiver answers 1 byte (1 = accept, 0 = decline).
 ///           On accept, for every file in order: raw bytes (exactly Size) followed by its 32-byte SHA-256.
 ///           Receiver finishes with 1 byte (1 = everything saved and verified).
@@ -28,6 +30,7 @@ public static class Protocol
 
     public static ReadOnlySpan<byte> Magic => "KDNG"u8;
     public const byte KindPing = (byte)'P';
+    public const byte KindHello = (byte)'H';
     public const byte KindOffer = (byte)'O';
 
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
@@ -131,7 +134,12 @@ public sealed record Hello(string Id, string Name, int Port);
 
 public sealed record OfferItem(string Path, long Size);
 
-public sealed record Offer(string SenderId, string SenderName, IReadOnlyList<OfferItem> Files, IReadOnlyList<string>? Folders)
+/// <param name="Edge">
+/// Which edge of the sender's screen the parcel was dropped on ("left", "right", "top", "bottom"), when it came
+/// through the screen-edge portal. The receiver shows it arriving from the opposite edge. Absent in 1.0.
+/// </param>
+public sealed record Offer(string SenderId, string SenderName, IReadOnlyList<OfferItem> Files, IReadOnlyList<string>? Folders,
+    string? Edge = null)
 {
     public long TotalBytes => Files.Sum(f => f.Size);
 }

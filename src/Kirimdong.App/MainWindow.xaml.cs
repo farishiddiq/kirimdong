@@ -16,6 +16,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using Kirimdong.App.Interop;
+using Kirimdong.App.Services;
 using Kirimdong.App.ViewModels;
 using Kirimdong.Core;
 using Microsoft.Win32;
@@ -31,7 +33,9 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<TransferItem> _slips = new();
     private readonly Queue<OfferPrompt> _offers = new();
     private readonly DispatcherTimer _timer;
+    private readonly EdgeWatcher _edges;
     private OfferPrompt? _currentOffer;
+    private ConnectionReport? _report;
     private bool _loaded;
 
     public MainWindow(AppSettings settings, int? port)
@@ -44,21 +48,28 @@ public partial class MainWindow : Window
         SaveFolderText.Text = settings.SaveFolder;
         SaveFolderText.ToolTip = settings.SaveFolder;
         AutoAcceptBox.IsChecked = settings.AutoAccept;
+        PortalBox.IsChecked = settings.EdgePortal;
         PeerList.ItemsSource = _peers;
         SlipList.ItemsSource = _slips;
 
         _server = new TransferServer(Identity, () => _settings.SaveFolder, DecideAsync);
         _server.TransferStarted += t => Dispatcher.BeginInvoke(() => AddSlip(t));
+        _server.HelloReceived += (hello, address) => _discovery?.Learn(hello, address);
         try { _server.Start(port ?? Protocol.DefaultTcpPort); }
         catch (SocketException) { _server.Start(0); } // port taken: any free port works, discovery tells others which
 
         _discovery = new DiscoveryService(Identity);
         _discovery.PeersChanged += () => Dispatcher.BeginInvoke(SyncPeers);
+        _discovery.SweepStateChanged += () => Dispatcher.BeginInvoke(SyncPeers);
         _discovery.Start();
         NetworkChange.NetworkAddressChanged += OnNetworkChanged;
 
+        _edges = new EdgeWatcher(new PortalWindow(), PeerAtEdge) { Enabled = settings.EdgePortal };
+        _edges.Dropped += OnPortalDrop;
+
         ShowAddresses();
         SyncPeers();
+        Loaded += async (_, _) => await RefreshConnectionAsync();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
         _timer.Tick += (_, _) =>
@@ -86,10 +97,11 @@ public partial class MainWindow : Window
         MyAddress.Text = text;
     }
 
-    private void OnNetworkChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(() =>
+    private void OnNetworkChanged(object? sender, EventArgs e) => Dispatcher.BeginInvoke(async () =>
     {
         ShowAddresses();
         _discovery.AnnounceNow();
+        await RefreshConnectionAsync();
     });
 
     private void CommitName()
@@ -145,6 +157,14 @@ public partial class MainWindow : Window
         _settings.Save();
     }
 
+    private void Portal_Changed(object sender, RoutedEventArgs e)
+    {
+        if (!_loaded) return;
+        _settings.EdgePortal = PortalBox.IsChecked == true;
+        _settings.Save();
+        _edges.Enabled = _settings.EdgePortal;
+    }
+
     // ----- other PCs -----
 
     private void SyncPeers()
@@ -154,16 +174,62 @@ public partial class MainWindow : Window
         foreach (var peer in current)
         {
             var item = _peers.FirstOrDefault(p => p.Id == peer.Id);
-            if (item is null) _peers.Add(new PeerItem(peer));
+            if (item is null)
+            {
+                // The first PC ever found gets the right-hand edge, so dragging past the edge works out of the box.
+                if (_settings.PeerEdges.Count == 0)
+                {
+                    _settings.PeerEdges[peer.Id] = "right";
+                    _settings.Save();
+                }
+                item = new PeerItem(peer, _settings.PeerEdges.GetValueOrDefault(peer.Id), _settings.TrustedPeers.Contains(peer.Id));
+                item.TrustChanged += OnTrustChanged;
+                _peers.Add(item);
+            }
             else item.Update(peer);
         }
         EmptyState.Visibility = _peers.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         PeerCount.Text = _peers.Count switch
         {
+            0 when _discovery.IsSweeping => "Memindai jaringan…",
             0 => _discovery.ListenError is null ? "Mencari…" : "Pencarian otomatis mati, pakai IP",
             1 => "1 PC ditemukan",
             var n => $"{n} PC ditemukan",
         };
+    }
+
+    private void OnTrustChanged(PeerItem peer)
+    {
+        _settings.TrustedPeers.Remove(peer.Id);
+        if (peer.IsTrusted) _settings.TrustedPeers.Add(peer.Id);
+        _settings.Save();
+    }
+
+    /// <summary>One edge leads to one PC: choosing an edge takes it from any other PC; choosing it again clears it.</summary>
+    private void Edge_Click(object sender, RoutedEventArgs e)
+    {
+        if (PeerOf(sender) is not { } peer || (sender as FrameworkElement)?.Tag is not string edge) return;
+        var clear = peer.Edge == edge;
+        foreach (var other in _peers.Where(p => p.Edge == edge)) other.Edge = null;
+        foreach (var key in _settings.PeerEdges.Where(kv => kv.Value == edge || kv.Key == peer.Id).Select(kv => kv.Key).ToList())
+            _settings.PeerEdges.Remove(key);
+        if (!clear)
+        {
+            peer.Edge = edge;
+            _settings.PeerEdges[peer.Id] = edge;
+        }
+        _settings.Save();
+    }
+
+    private (string Id, string Name)? PeerAtEdge(string edge)
+    {
+        var peer = _peers.FirstOrDefault(p => p.Edge == edge);
+        return peer is null ? null : (peer.Id, peer.Name);
+    }
+
+    private void OnPortalDrop(string peerId, string edge, string[] paths)
+    {
+        if (_peers.FirstOrDefault(p => p.Id == peerId) is { } peer) Send(peer, paths, edge);
     }
 
     private async void AddByIp_Click(object sender, RoutedEventArgs e)
@@ -185,7 +251,8 @@ public partial class MainWindow : Window
             var address = IPAddress.TryParse(host, out var ip)
                 ? ip
                 : (await Dns.GetHostAddressesAsync(host)).First(a => a.AddressFamily == AddressFamily.InterNetwork);
-            var hello = await TransferClient.PingAsync(address, port);
+            // A hello (not just a ping) so the other PC learns about this one too.
+            var hello = await TransferClient.HelloAsync(address, port, Identity(), TimeSpan.FromSeconds(5));
             if (hello.Id == _settings.DeviceId)
             {
                 IpStatus.Text = "Itu alamat PC ini sendiri.";
@@ -245,41 +312,63 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog(this) == true) Send(peer, dialog.FolderNames);
     }
 
-    private async void Send(PeerItem peer, IReadOnlyList<string> paths)
+    private async void Send(PeerItem peer, IReadOnlyList<string> paths, string? edge = null)
     {
         OutgoingBatch batch;
         try { batch = await Task.Run(() => FileCollector.Collect(paths)); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            if (edge is not null) BringToFront(); // dropped on the portal: the window may be behind others
             MessageBox.Show(this, ex.Message, "kirimdong", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
         if (batch.IsEmpty)
         {
+            if (edge is not null) BringToFront();
             MessageBox.Show(this, "Tidak ada file yang bisa dikirim dari pilihan itu.", "kirimdong", MessageBoxButton.OK, MessageBoxImage.Information);
             return;
         }
         var transfer = TransferClient.CreateTransfer(peer.Name, batch);
-        AddSlip(transfer);
+        var item = AddSlip(transfer);
+        // Through the portal the main window may be hidden: follow the parcel at the edge it left by.
+        if (edge is not null) new ToastWindow(item, edge);
         var target = peer.EndPoint;
         var me = Identity();
-        _ = Task.Run(() => TransferClient.SendAsync(target, me, batch, transfer));
+        _ = Task.Run(() => TransferClient.SendAsync(target, me, batch, transfer, edge));
     }
 
     // ----- slips -----
 
-    private void AddSlip(Transfer transfer)
+    private TransferItem AddSlip(Transfer transfer)
     {
         var item = new TransferItem(transfer);
+        var toasted = false;
         transfer.Changed += _ => Dispatcher.BeginInvoke(() =>
         {
             item.RefreshAll();
-            if (transfer.State == TransferState.Done && transfer.Direction == TransferDirection.Receive && !IsActive)
-                Flash();
+            if (transfer.Direction != TransferDirection.Receive) return;
+            // An accepted parcel arrives at the edge facing the PC it came from (or the right edge),
+            // unless kirimdong is already in front where its slip is visible.
+            if (transfer.State == TransferState.Running && !toasted && (transfer.Edge is not null || !IsActive))
+            {
+                toasted = true;
+                new ToastWindow(item, Opposite(transfer.Edge) ?? "right");
+            }
+            if (transfer.State == TransferState.Done && !IsActive) Flash();
         });
         _slips.Insert(0, item);
         UpdateSlipArea();
+        return item;
     }
+
+    private static string? Opposite(string? edge) => edge switch
+    {
+        "left" => "right",
+        "right" => "left",
+        "top" => "bottom",
+        "bottom" => "top",
+        _ => null,
+    };
 
     private void UpdateSlipArea()
     {
@@ -315,7 +404,7 @@ public partial class MainWindow : Window
 
     private async Task<bool> DecideAsync(IncomingOffer offer, CancellationToken ct)
     {
-        if (_settings.AutoAccept) return true;
+        if (_settings.AutoAccept || _settings.TrustedPeers.Contains(offer.Offer.SenderId)) return true;
         var prompt = await Dispatcher.InvokeAsync(() =>
         {
             var p = new OfferPrompt(offer, _settings.SaveFolder, ct);
@@ -344,6 +433,8 @@ public partial class MainWindow : Window
             OfferMore.Visibility = next.More.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
             OfferFolder.Text = $"Disimpan ke {next.SaveFolder}";
             OfferCountdown.Text = next.Countdown;
+            OfferTrust.IsChecked = false;
+            OfferTrustText.Text = $"Lain kali langsung terima dari {next.SenderName}";
             OfferLayer.Visibility = Visibility.Visible;
             AcceptButton.Focus();
             Flash();
@@ -360,7 +451,115 @@ public partial class MainWindow : Window
         ShowNextOffer();
     }
 
-    private void Accept_Click(object sender, RoutedEventArgs e) => _currentOffer?.Respond(true);
+    private void Accept_Click(object sender, RoutedEventArgs e)
+    {
+        if (_currentOffer is not { } offer) return;
+        if (OfferTrust.IsChecked == true)
+        {
+            var id = offer.Offer.Offer.SenderId;
+            if (!_settings.TrustedPeers.Contains(id)) _settings.TrustedPeers.Add(id);
+            _settings.Save();
+            _peers.FirstOrDefault(p => p.Id == id)?.SetTrustedQuietly(true);
+        }
+        offer.Respond(true);
+    }
+
+    // ----- connection check -----
+
+    /// <summary>Re-reads network type and firewall rules; shows the banner when other PCs are being kept out.</summary>
+    private async Task RefreshConnectionAsync()
+    {
+        _report = await ConnectionCheck.RunAsync();
+        var network = _report.Networks.FirstOrDefault();
+        var where = network is null ? "jaringan ini" : $"jaringan {network.Name} ({network.Category})";
+        switch (_report.Firewall)
+        {
+            case FirewallState.NotAllowed:
+                BannerText.Text = $"Firewall Windows menahan kiriman masuk di {where}, jadi PC lain tidak bisa menemukan atau mengirim ke PC ini. Tekan Izinkan, lalu pilih Ya di jendela izin Windows.";
+                break;
+            case FirewallState.Blocked:
+                BannerText.Text = $"Izin firewall untuk kirimdong pernah ditolak di PC ini, jadi PC lain tidak bisa menemukan atau mengirim ke sini. Tekan Izinkan untuk membukanya lagi.";
+                break;
+        }
+        var needsFix = _report.Firewall is FirewallState.NotAllowed or FirewallState.Blocked;
+        FirewallBanner.Visibility = needsFix ? Visibility.Visible : Visibility.Collapsed;
+        BannerButton.IsEnabled = true;
+        BannerButton.Content = "Izinkan";
+        if (CheckLayer.Visibility == Visibility.Visible) FillCheck();
+    }
+
+    private void FillCheck()
+    {
+        if (_report is null) return;
+        var network = _report.Networks.FirstOrDefault();
+        CheckNetwork.Text = network is null
+            ? "Tidak tersambung ke jaringan."
+            : $"{network.Name} · {network.Category}" + (network.Category == "Public"
+                ? ". Windows memperlakukan Wi-Fi ini sebagai jaringan umum, jadi koneksi masuk diblokir kecuali app diizinkan."
+                : ".");
+        if (network?.LinkMbps is { } mbps && mbps > 0)
+        {
+            // Between two laptops on one access point every byte crosses the air twice; real throughput is roughly half of a third of the link rate.
+            var estimate = Math.Max(1, mbps / 8.0 * 0.55 / 2);
+            CheckSpeed.Text = $"Link {network.Adapter} {mbps} Mbps. Antar dua laptop di Wi-Fi yang sama, perkiraan sekitar {estimate:0} MB/dtk. " +
+                              "Lebih cepat lewat 5 GHz dekat router, atau kabel LAN.";
+        }
+        else CheckSpeed.Text = "Kecepatan link tidak diketahui.";
+        CheckFirewall.Text = _report.Firewall switch
+        {
+            FirewallState.Allowed => "kirimdong diizinkan menerima koneksi di jaringan ini.",
+            FirewallState.Off => "Firewall Windows mati di jaringan ini; tidak ada yang menghalangi.",
+            FirewallState.Blocked => "Diblokir. Izin untuk kirimdong pernah ditolak.",
+            FirewallState.NotAllowed => $"Belum diizinkan di jaringan {_report.CurrentProfiles}. PC lain tidak bisa mengirim ke sini.",
+            _ => "Tidak bisa dibaca.",
+        };
+        CheckFixButton.Visibility = _report.Firewall is FirewallState.NotAllowed or FirewallState.Blocked or FirewallState.Unknown
+            ? Visibility.Visible : Visibility.Collapsed;
+        CheckDiscovery.Text = (_discovery.ListenError is null
+            ? "Siaran otomatis aktif. "
+            : "Siaran otomatis tidak bisa didengar di PC ini; pencarian memakai pindai jaringan. ")
+            + (_peers.Count == 0 ? "Belum ada PC lain yang ditemukan." : $"{_peers.Count} PC ditemukan.");
+    }
+
+    private async void CheckConnection_Click(object sender, RoutedEventArgs e)
+    {
+        CheckLayer.Visibility = Visibility.Visible;
+        FillCheck();
+        await RefreshConnectionAsync();
+    }
+
+    private void CloseCheck_Click(object sender, RoutedEventArgs e) => CheckLayer.Visibility = Visibility.Collapsed;
+
+    private async void FixFirewall_Click(object sender, RoutedEventArgs e)
+    {
+        BannerButton.IsEnabled = false;
+        BannerButton.Content = "Menunggu izin…";
+        CheckFixButton.IsEnabled = false;
+        var ok = await ConnectionCheck.RequestFixAsync();
+        CheckFixButton.IsEnabled = true;
+        await RefreshConnectionAsync();
+        if (ok && _report?.Firewall is FirewallState.Allowed)
+        {
+            _discovery.AnnounceNow();
+            _ = _discovery.SweepAsync();
+        }
+        else if (!ok)
+        {
+            BannerText.Text = "Belum diizinkan: jendela izin Windows ditutup atau ditolak. Tekan Izinkan lagi dan pilih Ya.";
+        }
+    }
+
+    private async void Sweep_Click(object sender, RoutedEventArgs e)
+    {
+        SweepButton.IsEnabled = false;
+        CheckDiscovery.Text = "Menanyai setiap alamat di jaringan ini…";
+        var found = await _discovery.SweepAsync();
+        SweepButton.IsEnabled = true;
+        FillCheck();
+        CheckDiscovery.Text += found > 0 ? $" Pindai menjangkau {found} PC."
+            : _peers.Count > 0 ? " Pindai tidak menemukan PC tambahan."
+            : " Pindai tidak menemukan kirimdong lain. Pastikan app terbuka di PC itu dan firewall-nya sudah diizinkan.";
+    }
 
     private void Decline_Click(object sender, RoutedEventArgs e) => _currentOffer?.Respond(false);
 
@@ -385,17 +584,7 @@ public partial class MainWindow : Window
         Topmost = false;
     }
 
-    private void Flash()
-    {
-        var info = new FLASHWINFO
-        {
-            cbSize = (uint)Marshal.SizeOf<FLASHWINFO>(),
-            hwnd = new WindowInteropHelper(this).Handle,
-            dwFlags = 3 | 12, // FLASHW_ALL | FLASHW_TIMERNOFG
-            uCount = 0,
-        };
-        FlashWindowEx(ref info);
-    }
+    private void Flash() => Native.Flash(new WindowInteropHelper(this).Handle);
 
     private void Minimize_Click(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
 
@@ -432,23 +621,12 @@ public partial class MainWindow : Window
         foreach (var slip in _slips) slip.Transfer.Cancel();
         while (_offers.TryDequeue(out var p)) p.Respond(false);
         _currentOffer?.Respond(false);
+        _edges.Dispose();
+        foreach (var toast in Application.Current.Windows.OfType<ToastWindow>().ToList()) toast.Close();
         _discovery.Dispose();
         _server.Dispose();
         base.OnClosed(e);
     }
 
     private static string? ExistingOrNull(string path) => Directory.Exists(path) ? path : null;
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct FLASHWINFO
-    {
-        public uint cbSize;
-        public IntPtr hwnd;
-        public uint dwFlags;
-        public uint uCount;
-        public uint dwTimeout;
-    }
-
-    [DllImport("user32.dll")]
-    private static extern bool FlashWindowEx(ref FLASHWINFO info);
 }

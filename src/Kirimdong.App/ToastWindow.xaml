@@ -1,0 +1,40 @@
+<Window x:Class="Kirimdong.App.ToastWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Kirimdong.App.Controls"
+        Title="kirimdong" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
+        ShowActivated="False" Width="380" Height="196" Background="{StaticResource KraftFlat}"
+        FontFamily="{StaticResource Display}" Foreground="{StaticResource Ink}" UseLayoutRounding="True"
+        MouseEnter="OnMouseEnter" MouseLeave="OnMouseLeave">
+  <!-- A parcel arriving at the edge of the screen it was sent towards, or leaving through it. -->
+  <Grid ClipToBounds="True">
+    <c:PaperCard x:Name="Card" Fill="{DynamicResource PaperBrush}" Notch="12" Margin="12" RenderTransformOrigin="0.5,0.5">
+      <c:PaperCard.RenderTransform><TranslateTransform x:Name="Slide" /></c:PaperCard.RenderTransform>
+      <Grid Margin="20,14,16,16">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Width="30" Height="26" Content="&#xE8BB;"
+                  Focusable="False" Click="Close_Click" ToolTip="Tutup" />
+          <TextBlock x:Name="Heading" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" VerticalAlignment="Center" />
+        </DockPanel>
+        <TextBlock Grid.Row="1" x:Name="Peer" FontFamily="{StaticResource Hand}" FontSize="26" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+        <TextBlock Grid.Row="2" x:Name="Summary" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+        <DockPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0,8,0,0">
+          <StackPanel x:Name="Actions" DockPanel.Dock="Right" Orientation="Horizontal" Visibility="Collapsed" Margin="12,0,0,0">
+            <Button Style="{StaticResource InkButton}" Content="Buka" Padding="14,7" Focusable="False" Click="Open_Click" />
+            <Button Style="{StaticResource KraftButton}" Content="Folder" Padding="12,7" Margin="6,0,0,0" Focusable="False" Click="Folder_Click" />
+          </StackPanel>
+          <StackPanel VerticalAlignment="Center">
+            <ProgressBar x:Name="Meter" Style="{StaticResource Meter}" />
+            <TextBlock x:Name="Status" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,5,0,0" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </DockPanel>
+      </Grid>
+    </c:PaperCard>
+  </Grid>
+</Window>

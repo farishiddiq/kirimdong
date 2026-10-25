@@ -1,0 +1,21 @@
+<Window x:Class="Kirimdong.App.PortalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:Kirimdong.App.Controls"
+        Title="kirimdong portal" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
+        ShowActivated="False" AllowDrop="True" Width="260" Height="520"
+        Background="{DynamicResource KraftBrush}" FontFamily="{StaticResource Display}" Foreground="{StaticResource Ink}"
+        UseLayoutRounding="True" DragEnter="OnDragEnter" DragOver="OnDragOver" DragLeave="OnDragLeave" Drop="OnDrop">
+  <!-- The way through to the PC beside this one: a parcel label stuck on the edge of the screen. -->
+  <Grid Margin="18">
+    <c:PaperCard x:Name="Card" Fill="{DynamicResource PaperBrush}" Notch="14" VerticalAlignment="Center">
+      <StackPanel Margin="22,26">
+        <TextBlock x:Name="Arrow" FontFamily="{StaticResource Glyphs}" FontSize="44" Text="&#xE72A;" Margin="0,0,0,14" />
+        <TextBlock x:Name="Prompt" Text="Lepas di sini untuk kirim ke" FontSize="17" TextWrapping="Wrap" />
+        <TextBlock x:Name="PeerName" FontFamily="{StaticResource Hand}" FontSize="32" FontWeight="Bold" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock x:Name="Hint" Text="Seret file sampai ke label ini" FontSize="13" Margin="0,14,0,0" TextWrapping="Wrap"
+                   Foreground="{StaticResource InkOnPaperMuted}" />
+      </StackPanel>
+    </c:PaperCard>
+  </Grid>
+</Window>

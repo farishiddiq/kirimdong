@@ -52,13 +52,17 @@ public sealed class PeerItem : Observable
     private string _name;
     private string _address;
     private bool _isDropTarget;
+    private string? _edge;
+    private bool _isTrusted;
 
-    public PeerItem(Peer peer)
+    public PeerItem(Peer peer, string? edge, bool trusted)
     {
         Id = peer.Id;
         _name = peer.Name;
         _address = peer.Address.ToString();
         EndPoint = peer.EndPoint;
+        _edge = edge;
+        _isTrusted = trusted;
     }
 
     public string Id { get; }
@@ -66,6 +70,25 @@ public sealed class PeerItem : Observable
     public string Name { get => _name; private set => Set(ref _name, value); }
     public string Address { get => _address; private set => Set(ref _address, value); }
     public bool IsDropTarget { get => _isDropTarget; set => Set(ref _isDropTarget, value); }
+
+    /// <summary>The edge of this screen that leads to this PC (null: none).</summary>
+    public string? Edge { get => _edge; set => Set(ref _edge, value); }
+
+    /// <summary>Parcels from this PC are accepted without asking. Changed by the tick on its label.</summary>
+    public bool IsTrusted
+    {
+        get => _isTrusted;
+        set { if (Set(ref _isTrusted, value)) TrustChanged?.Invoke(this); }
+    }
+
+    public event Action<PeerItem>? TrustChanged;
+
+    /// <summary>Sets the tick from settings without reporting it back.</summary>
+    public void SetTrustedQuietly(bool trusted)
+    {
+        _isTrusted = trusted;
+        Raise(nameof(IsTrusted));
+    }
 
     public void Update(Peer peer)
     {
