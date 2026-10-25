@@ -1,0 +1,72 @@
+<!--
+  kirimdong MSI (WiX Toolset 5). Per-user install: no administrator rights needed.
+  Build with installer/build.ps1, which publishes the self-contained app first.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="kirimdong"
+           Manufacturer="farishiddiq"
+           Version="$(var.Version)"
+           UpgradeCode="c953d011-b339-4091-8918-d89044f2043f"
+           Scope="perUser"
+           Compressed="yes">
+
+    <MajorUpgrade DowngradeErrorMessage="Versi kirimdong yang lebih baru sudah terpasang." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Icon Id="AppIcon" SourceFile="..\src\Kirimdong.App\Assets\app.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/farishiddiq/kirimdong" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/farishiddiq/kirimdong/issues" />
+    <Property Id="ARPNOREPAIR" Value="1" />
+
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value="banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="dialog.bmp" />
+    <ui:WixUI Id="WixUI_Minimal" />
+
+    <!-- %LocalAppData%\Programs\kirimdong: the standard per-user program location (no admin rights). -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="UserProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="kirimdong" />
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="kirimdong">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="Shortcuts" />
+      <ComponentRef Id="Cleanup" />
+    </Feature>
+
+    <ComponentGroup Id="AppFiles" Directory="INSTALLFOLDER">
+      <Files Include="$(var.PublishDir)\**" />
+    </ComponentGroup>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Component Id="Shortcuts" Guid="686c492c-0d31-4f9e-ba1f-2f4b648acd5d">
+        <Shortcut Id="StartMenuShortcut" Name="kirimdong" Description="Kirim file antar PC Windows di Wi-Fi yang sama"
+                  Target="[INSTALLFOLDER]kirimdong.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+        <Shortcut Id="DesktopShortcut" Directory="DesktopFolder" Name="kirimdong" Description="Kirim file antar PC Windows di Wi-Fi yang sama"
+                  Target="[INSTALLFOLDER]kirimdong.exe" WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+        <RegistryValue Root="HKCU" Key="Software\kirimdong" Name="Installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="Cleanup" Guid="8871a05c-18c1-451b-8410-842898c08179">
+        <RegistryValue Root="HKCU" Key="Software\kirimdong" Name="InstallFolder" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+        <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Close a running copy so its files are not locked. Settings in %AppData%\kirimdong and received
+         files (Downloads\kirimdong by default) belong to the user and are kept. -->
+    <CustomAction Id="CloseRunningApp" Directory="INSTALLFOLDER" Execute="immediate" Return="ignore"
+                  ExeCommand="&quot;[SystemFolder]taskkill.exe&quot; /IM kirimdong.exe /F" />
+    <InstallExecuteSequence>
+      <Custom Action="CloseRunningApp" Before="InstallValidate" Condition="Installed" />
+    </InstallExecuteSequence>
+  </Package>
+</Wix>

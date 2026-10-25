@@ -1,0 +1,242 @@
+<Application x:Class="Kirimdong.App.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnMainWindowClose">
+  <Application.Resources>
+    <!-- Three inks, like a two-colour print job on brown board: blue-black marker, label paper, sticker orange. -->
+    <Color x:Key="KraftColor">#C69559</Color>
+    <Color x:Key="KraftDarkColor">#AF7F45</Color>
+    <Color x:Key="PaperColor">#FBF9F4</Color>
+    <SolidColorBrush x:Key="Ink" Color="#0D141A" />
+    <SolidColorBrush x:Key="InkOnKraftMuted" Color="#3B2510" />
+    <SolidColorBrush x:Key="InkOnPaperMuted" Color="#4F555B" />
+    <SolidColorBrush x:Key="Accent" Color="#FF6A13" />
+    <SolidColorBrush x:Key="KraftFlat" Color="#C69559" />
+    <SolidColorBrush x:Key="KraftLight" Color="#E7D3B5" />
+    <SolidColorBrush x:Key="KraftLightHover" Color="#DDC29B" />
+    <SolidColorBrush x:Key="PaperFlat" Color="#FBF9F4" />
+    <SolidColorBrush x:Key="TapeBrush" Color="#D8E6C995" />
+    <SolidColorBrush x:Key="Scrim" Color="#B30D141A" />
+
+    <FontFamily x:Key="Display">Bahnschrift</FontFamily>
+    <FontFamily x:Key="Hand">Ink Free</FontFamily>
+    <FontFamily x:Key="Glyphs">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <Style x:Key="Focus">
+      <Setter Property="Control.Template">
+        <Setter.Value>
+          <ControlTemplate>
+            <Rectangle Margin="-3" Stroke="{StaticResource Accent}" StrokeThickness="2" SnapsToDevicePixels="True" />
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- The one action shape: a square block of ink with orange type; hover swaps the two. -->
+    <Style x:Key="InkButton" TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource Ink}" />
+      <Setter Property="Foreground" Value="{StaticResource Accent}" />
+      <Setter Property="FontFamily" Value="{StaticResource Display}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Padding" Value="16,9" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
+      <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+      <Setter Property="RenderTransform"><Setter.Value><TranslateTransform /></Setter.Value></Setter>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="{StaticResource Accent}" />
+          <Setter Property="Foreground" Value="{StaticResource Ink}" />
+        </Trigger>
+        <Trigger Property="IsPressed" Value="True">
+          <Setter Property="RenderTransform"><Setter.Value><TranslateTransform Y="1" /></Setter.Value></Setter>
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+          <Setter Property="Opacity" Value="0.45" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="KraftButton" TargetType="Button" BasedOn="{StaticResource InkButton}">
+      <Setter Property="Background" Value="{StaticResource KraftLight}" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="{StaticResource KraftLightHover}" />
+          <Setter Property="Foreground" Value="{StaticResource Ink}" />
+        </Trigger>
+        <Trigger Property="IsPressed" Value="True">
+          <Setter Property="RenderTransform"><Setter.Value><TranslateTransform Y="1" /></Setter.Value></Setter>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- Words that act, set in the text face and underlined. -->
+    <Style x:Key="WordButton" TargetType="Button">
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="FontFamily" Value="{StaticResource Display}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <TextBlock x:Name="t" Text="{TemplateBinding Content}" TextDecorations="Underline" Background="Transparent" />
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="t" Property="Foreground" Value="{StaticResource Accent}" />
+                <Setter TargetName="t" Property="Background" Value="{StaticResource Ink}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="ChromeButton" TargetType="Button">
+      <Setter Property="Width" Value="46" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="FontFamily" Value="{StaticResource Glyphs}" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border Background="{TemplateBinding Background}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="#33000000" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="CloseButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="{StaticResource Ink}" />
+          <Setter Property="Foreground" Value="{StaticResource Accent}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="Field" TargetType="TextBox">
+      <Setter Property="Background" Value="{StaticResource PaperFlat}" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="CaretBrush" Value="{StaticResource Ink}" />
+      <Setter Property="SelectionBrush" Value="{StaticResource Accent}" />
+      <Setter Property="FontFamily" Value="{StaticResource Display}" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="TextBox">
+            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+              <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsKeyboardFocused" Value="True">
+          <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <Style x:Key="Tick" TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="FontFamily" Value="{StaticResource Display}" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CheckBox">
+            <Grid Background="Transparent">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Border x:Name="box" Width="22" Height="22" Background="{StaticResource KraftLight}" VerticalAlignment="Top" Margin="0,1,0,0">
+                <Path x:Name="mark" Data="M 5,11 L 9.5,15.5 L 17,6.5" Stroke="{StaticResource Accent}" StrokeThickness="3"
+                      StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round" Visibility="Collapsed" />
+              </Border>
+              <ContentPresenter Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="box" Property="Background" Value="{StaticResource Ink}" />
+                <Setter TargetName="mark" Property="Visibility" Value="Visible" />
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="box" Property="Opacity" Value="0.85" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style TargetType="ScrollBar">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="MinWidth" Value="8" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ScrollBar">
+            <Track x:Name="PART_Track" IsDirectionReversed="True">
+              <Track.Thumb>
+                <Thumb>
+                  <Thumb.Template>
+                    <ControlTemplate TargetType="Thumb">
+                      <Border Background="#990D141A" />
+                    </ControlTemplate>
+                  </Thumb.Template>
+                </Thumb>
+              </Track.Thumb>
+            </Track>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="Meter" TargetType="ProgressBar">
+      <Setter Property="Height" Value="10" />
+      <Setter Property="Minimum" Value="0" />
+      <Setter Property="Maximum" Value="1" />
+      <Setter Property="Background" Value="{StaticResource KraftLight}" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ProgressBar">
+            <Grid>
+              <Border x:Name="PART_Track" Background="{TemplateBinding Background}" />
+              <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" />
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <BooleanToVisibilityConverter x:Key="Visible" />
+  </Application.Resources>
+</Application>
