@@ -1,0 +1,13 @@
+Mau kirim file ke PC sebelah, tapi flashdisk entah di mana? 📦
+
+Jadi aku bikin kirimdong: app Windows buat kirim file antar PC di Wi-Fi yang sama. Buka di dua PC, seret file ke label tujuan, penerima tekan Terima.
+
+• Tanpa akun, tanpa internet, tanpa kabel
+• File & folder, dicek SHA-256 sampai utuh
+• Penerima selalu ditanya dulu
+• Gratis & open source
+
+Download untuk Windows 10/11:
+github.com/farishiddiq/kirimdong
+
+Coba, terus kabari kalau ada yang kurang ya 🙏

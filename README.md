@@ -23,6 +23,10 @@ Belum ada PC lain yang terbuka:
 
 ![kirimdong: kardus kosong, menunggu PC lain di jaringan](promo/assets/kirimdong-empty.png)
 
+<p align="center">
+  <img src="promo/out/kirimdong-portrait.png" alt="Poster kirimdong: Kirim file ke PC sebelah." width="420">
+</p>
+
 ## Fitur
 
 - **Otomatis saling menemukan.** PC yang membuka kirimdong di jaringan yang sama muncul sebagai label dalam

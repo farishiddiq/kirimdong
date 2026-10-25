@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>kirimdong poster</title>
+<!--
+  Launch poster for kirimdong. One source, three formats (render one per screenshot):
+    poster.html?f=portrait  1080x1350 (Threads, Instagram, Facebook)
+    poster.html?f=square    1080x1080 (WhatsApp, Instagram square)
+    poster.html?f=story     1080x1920 (status / story; bottom 280px kept clear)
+  The idea is the app's own: the app window is the cardboard box, taped onto a field of the orange of its
+  shipping sticker. Both pictures are unedited screenshots of kirimdong 1.0.0; the offer card is cut
+  out of kirimdong-offer.png. Type: Bahnschrift, the face the app itself uses (installed on Windows).
+-->
+<style>
+  :root {
+    --board: #ff6a13;
+    --ink: #0d141a;
+    --ink-soft: #3d1500;
+    --accent: #ff6a13;
+    --tape: rgba(230, 201, 149, 0.86);
+    --face: "Bahnschrift", "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--board); }
+  body {
+    width: 1080px; height: 1350px; overflow: hidden; position: relative;
+    color: var(--ink); font-family: var(--face);
+    background: var(--board);
+    padding: 56px 64px 54px;
+    display: flex; flex-direction: column;
+  }
+
+  body > * { flex-shrink: 0; }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand img { width: 60px; height: 60px; }
+  .brand b { font-size: 48px; font-weight: 700; font-stretch: 87.5%; letter-spacing: -0.01em; }
+  .brand span { margin-left: auto; font-size: 26px; color: var(--ink-soft); }
+
+  h1 {
+    margin-top: 30px;
+    font-size: 108px; line-height: 0.9; font-weight: 700; font-stretch: 75%; letter-spacing: -0.02em;
+  }
+  .lede { margin-top: 20px; font-size: 28px; line-height: 1.32; }
+
+  /* The screenshots, taped on. Square corners, no shadow: the orange field shows the edge. */
+  .sheets { position: relative; margin-top: 46px; height: 566px; }
+  .main { position: absolute; left: -4px; top: 0; width: 830px; transform: rotate(-1.3deg); }
+  .main img { display: block; width: 100%; height: auto; }
+  .offer { position: absolute; right: -16px; bottom: 0; width: 380px; transform: rotate(2.4deg); }
+  .offer img { display: block; width: 100%; height: auto;
+    /* the card's own cut corners (16px on a 520x373 card), scaled with it */
+    clip-path: polygon(3.4% 0, 96.6% 0, 100% 4.8%, 100% 95.2%, 96.6% 100%, 3.4% 100%, 0 95.2%, 0 4.8%); }
+  .tape { position: absolute; height: 34px; background: var(--tape);
+    clip-path: polygon(2% 0, 98% 0, 100% 22%, 97% 45%, 100% 70%, 98% 100%, 2% 100%, 0 78%, 3% 52%, 0 26%); }
+  .main .t1 { left: 34%; top: -16px; width: 150px; transform: rotate(-4deg); }
+  .main .t2 { right: -38px; top: -4px; width: 150px; transform: rotate(36deg); }
+  .offer .t3 { left: 50%; top: -18px; width: 140px; transform: translateX(-50%) rotate(-3deg); }
+
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 40px; }
+  .facts p { font-size: 22px; line-height: 1.3; color: var(--ink-soft); }
+  .facts strong { display: block; font-size: 27px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+
+  .cta { margin-top: auto; padding-top: 30px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .button { background: var(--ink); color: var(--accent); padding: 22px 38px; font-size: 32px; font-weight: 700; white-space: nowrap; }
+  .where { text-align: right; font-size: 27px; line-height: 1.3; }
+  .where span { color: var(--ink-soft); }
+
+  /* Square: headline, the main sheet and the way to get it. */
+  body.square { height: 1080px; padding: 52px 60px 50px; }
+  body.square h1 { margin-top: 28px; font-size: 112px; }
+  body.square .lede, body.square .facts { display: none; }
+  body.square .sheets { margin-top: 38px; height: 560px; }
+  body.square .main { width: 780px; }
+  body.square .offer { width: 360px; right: -18px; bottom: 20px; }
+
+  /* Story: tall; everything grows, the facts stack, the bottom 280px stay clear of app chrome. */
+  body.story { height: 1920px; padding: 150px 64px 280px; }
+  body.story .brand b { font-size: 56px; }
+  body.story h1 { margin-top: 50px; font-size: 138px; }
+  body.story .lede { margin-top: 28px; font-size: 33px; }
+  body.story .sheets { margin-top: 56px; height: 630px; }
+  body.story .main { width: 870px; }
+  body.story .offer { width: 440px; right: -20px; bottom: -6px; }
+  body.story .facts { grid-template-columns: 1fr; gap: 16px; margin-top: 40px; }
+  body.story .facts p { font-size: 28px; }
+  body.story .facts strong { font-size: 34px; display: inline; margin-right: 10px; }
+</style>
+</head>
+<body>
+  <div class="brand"><img src="assets/app-icon.png" alt=""><b>kirimdong</b><span>untuk Windows 10 &amp; 11</span></div>
+
+  <h1>Kirim file ke<br>PC sebelah.</h1>
+  <p class="lede">Seret file ke label PC tujuan di Wi-Fi yang sama, penerima tekan Terima. Tanpa akun, tanpa internet, tanpa kabel.</p>
+
+  <div class="sheets">
+    <figure class="main">
+      <img src="assets/kirimdong-main.png" alt="kirimdong menampilkan dua PC di Wi-Fi yang sama dan slip pengiriman 2,3 GB yang sedang berjalan">
+      <i class="tape t1"></i><i class="tape t2"></i>
+    </figure>
+    <figure class="offer">
+      <img src="assets/offer-card.png" alt="Kartu paket masuk: Ada paket untukmu dari PC Ruang Tamu, dengan tombol Terima dan Tolak">
+      <i class="tape t3"></i>
+    </figure>
+  </div>
+
+  <div class="facts">
+    <p><strong>File &amp; folder utuh</strong>Dicek SHA-256 setelah tiba.</p>
+    <p><strong>Penerima memutuskan</strong>Terima atau tolak tiap paket.</p>
+    <p><strong>Gratis, open source</strong>Lisensi MIT, tanpa iklan.</p>
+  </div>
+
+  <div class="cta">
+    <span class="button">Unduh gratis</span>
+    <p class="where">github.com/farishiddiq<br><span>/kirimdong</span></p>
+  </div>
+
+  <script>
+    const f = new URLSearchParams(location.search).get('f');
+    if (f === 'square' || f === 'story') document.body.classList.add(f);
+  </script>
+</body>
+</html>
