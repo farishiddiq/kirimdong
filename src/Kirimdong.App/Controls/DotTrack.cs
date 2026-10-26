@@ -27,9 +27,9 @@ public class DotTrack : FrameworkElement
     public bool IsProblem { get => (bool)GetValue(IsProblemProperty); set => SetValue(IsProblemProperty, value); }
     public bool OnDark { get => (bool)GetValue(OnDarkProperty); set => SetValue(OnDarkProperty, value); }
 
-    private static readonly Brush Orange = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x2C)));
-    private static readonly Brush GreyLight = Freeze(new SolidColorBrush(Color.FromRgb(0xC9, 0xC9, 0xC9)));
-    private static readonly Brush GreyDark = Freeze(new SolidColorBrush(Color.FromRgb(0x5A, 0x5A, 0x5A)));
+    private static readonly Brush Orange = Freeze(new SolidColorBrush(Color.FromRgb(0xF9, 0x73, 0x16)));   // orange-500
+    private static readonly Brush GreyLight = Freeze(new SolidColorBrush(Color.FromRgb(0xD4, 0xD4, 0xD4))); // neutral-300
+    private static readonly Brush GreyDark = Freeze(new SolidColorBrush(Color.FromRgb(0x52, 0x52, 0x52)));  // neutral-600
 
     protected override Size MeasureOverride(Size availableSize) =>
         new(double.IsInfinity(availableSize.Width) ? 200 : availableSize.Width, 22);

@@ -4,15 +4,15 @@
         Title="kirimdong portal" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
         ShowActivated="False" AllowDrop="True" Width="260" Height="520"
         Background="{StaticResource Dark}" FontFamily="{StaticResource Text}" Foreground="{StaticResource OnInk}"
-        UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale" DragEnter="OnDragEnter" DragOver="OnDragOver" DragLeave="OnDragLeave" Drop="OnDrop">
+        UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale" Typography.NumeralAlignment="Tabular" DragEnter="OnDragEnter" DragOver="OnDragOver" DragLeave="OnDragLeave" Drop="OnDrop">
   <!-- The way through to the PC beside this one: the black tile with the arrow, orange once something is over it. -->
-  <Border x:Name="Card" Background="{StaticResource Dark}" Padding="24,26">
+  <Border x:Name="Card" Background="{StaticResource Dark}" Padding="24,24">
     <Grid>
       <StackPanel VerticalAlignment="Top">
         <Image Source="{StaticResource ImgLaptop}" Width="96" Height="96" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
-        <TextBlock x:Name="Prompt" Text="Lepas di sini untuk kirim ke" FontSize="15" Foreground="{StaticResource DarkInk2}" TextWrapping="Wrap" Margin="0,18,0,0" />
-        <TextBlock x:Name="PeerName" FontFamily="{StaticResource Display}" FontSize="28" FontWeight="Bold" TextWrapping="Wrap" Margin="0,4,0,0" />
-        <TextBlock x:Name="Hint" Text="Seret file sampai ke sini" FontSize="13" Foreground="{StaticResource DarkInk2}" Margin="0,12,0,0" TextWrapping="Wrap" />
+        <TextBlock x:Name="Prompt" Text="Lepas di sini untuk kirim ke" FontSize="14" Foreground="{StaticResource DarkInk2}" TextWrapping="Wrap" Margin="0,16,0,0" />
+        <TextBlock x:Name="PeerName" FontFamily="{StaticResource Display}" FontSize="30" FontWeight="Bold" TextWrapping="Wrap" Margin="0,4,0,0" />
+        <TextBlock x:Name="Hint" Text="Seret file sampai ke sini" FontSize="12" Foreground="{StaticResource DarkInk2}" Margin="0,12,0,0" TextWrapping="Wrap" />
       </StackPanel>
       <TextBlock x:Name="Arrow" FontFamily="{StaticResource Glyphs}" FontSize="60" Text="&#xE72A;" Foreground="{StaticResource Accent}"
                  HorizontalAlignment="Right" VerticalAlignment="Bottom" />

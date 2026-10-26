@@ -4,8 +4,13 @@
 seret file ke kartu tujuan, PC penerima menekan **Terima**. Tanpa akun, tanpa internet, tanpa kabel,
 tanpa upload ke cloud.
 
-**Baru di 1.2:** tampilan baru. Latar putih, kartu abu-abu dengan ilustrasi 3D, tombol pill hitam dan oranye,
-lembar gelap untuk paket masuk, dan jalur pengiriman bertitik seperti pelacakan paket. Semua fitur tetap sama.
+**Baru di 1.3:** font **Inter** dan desain yang mengikuti aturan [ui-skills](https://github.com/ibelick/ui-skills)
+(baseline-ui, fixing-accessibility, fixing-motion-performance): palet netral Tailwind, satu warna aksen (oranye,
+hanya untuk yang sedang bergerak), kartu abu-abu dengan ilustrasi 3D, angka tabular, nama yang bisa dibaca
+pembaca layar, dan fokus yang tetap di dalam dialog. Semua fitur tetap sama.
+
+**1.2:** tampilan putih dengan kartu abu-abu dan ilustrasi 3D, lembar gelap untuk paket masuk, dan jalur
+pengiriman bertitik seperti pelacakan paket.
 
 **1.1:** seret file ke **tepi layar** yang mengarah ke laptop sebelah, lepas, dan file muncul di layar laptop
 itu. Plus **Cek koneksi** yang memperbaiki penyebab paling umum dua laptop tidak saling ketemu (firewall
@@ -23,12 +28,10 @@ Paket masuk selalu ditanyakan dulu: isinya apa, berapa besar, disimpan ke mana, 
 
 ![kirimdong: lembar gelap "Paket masuk" berisi Foto Liburan Bali dengan tombol Tolak dan Terima](promo/assets/kirimdong-offer.png)
 
-Seret file sampai tepi kanan layar: portal kirimdong terbuka di sana. Lepas, dan file terbang ke PC di sebelah
-kanan. Di laptop penerima, kartu paket masuk dari tepi yang berlawanan.
+Seret file sampai tepi kanan layar: portal kirimdong (kartu hitam, oranye saat file di atasnya) terbuka di sana.
+Lepas, dan file terbang ke PC di sebelah kanan. Di laptop penerima, kartu ini masuk dari tepi yang berlawanan:
 
 <p>
-  <img src="promo/assets/kirimdong-portal.png" alt="Portal oranye di tepi layar: Lepas sekarang, terkirim ke PC Ruang Tamu" width="200">
-  &nbsp;
   <img src="promo/assets/kirimdong-portal-arrival.png" alt="Kartu di layar penerima: Paket masuk dari Laptop Rina, dengan Folder dan Buka" width="380">
 </p>
 
@@ -130,7 +133,7 @@ sudah diterima tidak ikut terhapus.
 
 ## Teknologi
 
-- C# / .NET 8, WPF (tanpa library pihak ketiga). Font bawaan Windows: Segoe UI Variable.
+- C# / .NET 8, WPF (tanpa library pihak ketiga). Font: Inter 4.1 (SIL OFL 1.1, dibundel; lihat `THIRD-PARTY-inter-LICENSE.txt`).
 - `Kirimdong.Core`: discovery UDP (port 47800) plus pindai TCP sebagai cadangan, transfer TCP (port 47801)
   dengan protokol sederhana (header `KDNG`, penawaran JSON, aliran byte per file + SHA-256), salin double-buffer,
   pembersihan path.

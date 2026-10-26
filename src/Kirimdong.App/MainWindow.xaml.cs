@@ -433,14 +433,22 @@ public partial class MainWindow : Window
             OfferCountdown.Text = next.Countdown;
             OfferTrust.IsChecked = false;
             OfferTrustText.Text = $"Lain kali langsung terima dari {next.SenderName}";
+            if (OfferLayer.Visibility != Visibility.Visible) _focusBeforeOffer = Keyboard.FocusedElement;
             OfferLayer.Visibility = Visibility.Visible;
             AcceptButton.Focus();
             Flash();
             SystemSounds.Asterisk.Play();
             return;
         }
-        OfferLayer.Visibility = Visibility.Collapsed;
+        if (OfferLayer.Visibility == Visibility.Visible)
+        {
+            OfferLayer.Visibility = Visibility.Collapsed;
+            _focusBeforeOffer?.Focus(); // back to where the user was
+            _focusBeforeOffer = null;
+        }
     }
+
+    private IInputElement? _focusBeforeOffer;
 
     private void OfferClosed(OfferPrompt prompt)
     {
@@ -519,14 +527,25 @@ public partial class MainWindow : Window
             + (_peers.Count == 0 ? "Belum ada PC lain yang ditemukan." : $"{_peers.Count} PC ditemukan.");
     }
 
+    private IInputElement? _focusBeforeCheck;
+
     private async void CheckConnection_Click(object sender, RoutedEventArgs e)
     {
+        _focusBeforeCheck = Keyboard.FocusedElement ?? sender as IInputElement;
         CheckLayer.Visibility = Visibility.Visible;
+        CheckCloseButton.Focus(); // focus starts inside the panel; Tab cycles within it
         FillCheck();
         await RefreshConnectionAsync();
     }
 
-    private void CloseCheck_Click(object sender, RoutedEventArgs e) => CheckLayer.Visibility = Visibility.Collapsed;
+    private void CloseCheck_Click(object sender, RoutedEventArgs e) => CloseCheck();
+
+    private void CloseCheck()
+    {
+        CheckLayer.Visibility = Visibility.Collapsed;
+        _focusBeforeCheck?.Focus(); // back to whatever opened it
+        _focusBeforeCheck = null;
+    }
 
     private async void FixFirewall_Click(object sender, RoutedEventArgs e)
     {
@@ -566,6 +585,11 @@ public partial class MainWindow : Window
         if (_currentOffer is not null && e.Key == Key.Escape)
         {
             _currentOffer.Respond(false);
+            e.Handled = true;
+        }
+        else if (CheckLayer.Visibility == Visibility.Visible && e.Key == Key.Escape)
+        {
+            CloseCheck();
             e.Handled = true;
         }
         base.OnPreviewKeyDown(e);

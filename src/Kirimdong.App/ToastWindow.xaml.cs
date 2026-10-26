@@ -65,8 +65,8 @@ public partial class ToastWindow : Window
         // Slide in from the edge itself, as if it came through it.
         var (dx, dy) = edge switch { "left" => (-Width, 0.0), "top" => (0.0, -Height), "bottom" => (0.0, Height), _ => (Width, 0.0) };
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
-        Slide.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(dx, 0, TimeSpan.FromMilliseconds(260)) { EasingFunction = ease });
-        Slide.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(dy, 0, TimeSpan.FromMilliseconds(260)) { EasingFunction = ease });
+        Slide.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(dx, 0, TimeSpan.FromMilliseconds(200)) { EasingFunction = ease });
+        Slide.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(dy, 0, TimeSpan.FromMilliseconds(200)) { EasingFunction = ease });
     }
 
     private void Refresh()

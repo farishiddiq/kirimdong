@@ -4,11 +4,11 @@
         xmlns:c="clr-namespace:Kirimdong.App.Controls"
         Title="kirimdong" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
         ShowActivated="False" Width="380" Height="182" Background="{StaticResource Card}"
-        FontFamily="{StaticResource Text}" Foreground="{StaticResource Ink}" UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale"
+        FontFamily="{StaticResource Text}" Foreground="{StaticResource Ink}" UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale" Typography.NumeralAlignment="Tabular"
         MouseEnter="OnMouseEnter" MouseLeave="OnMouseLeave">
   <!-- A shipment card at the screen edge: slides in from the edge the parcel crossed. -->
   <Grid ClipToBounds="True">
-    <Border x:Name="Card" Background="{StaticResource Card}" Padding="18,14,14,16">
+    <Border x:Name="Card" Background="{StaticResource Card}" Padding="16,14,14,16">
       <Border.RenderTransform><TranslateTransform x:Name="Slide" /></Border.RenderTransform>
       <Grid>
         <Grid.RowDefinitions>
@@ -17,24 +17,24 @@
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <DockPanel>
-          <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Width="30" Height="26" Content="&#xE8BB;"
+          <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Width="28" Height="24" Content="&#xE8BB;"
                   Focusable="False" Click="Close_Click" ToolTip="Tutup" VerticalAlignment="Top" />
-          <Border Width="46" Height="46" CornerRadius="23" Background="{StaticResource Tile}" VerticalAlignment="Top">
-            <Image x:Name="ParcelIcon" Source="{StaticResource ImgEnvelope}" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
+          <Border Width="44" Height="44" CornerRadius="24" Background="{StaticResource Tile}" VerticalAlignment="Top">
+            <Image x:Name="ParcelIcon" Source="{StaticResource ImgEnvelope}" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
           </Border>
           <StackPanel Margin="12,0,0,0">
-            <TextBlock x:Name="Heading" FontSize="12.5" Foreground="{StaticResource Ink2}" />
-            <TextBlock x:Name="Peer" FontFamily="{StaticResource Display}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-            <TextBlock x:Name="Summary" FontSize="13" Foreground="{StaticResource Ink2}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+            <TextBlock x:Name="Heading" FontSize="12" Foreground="{StaticResource Ink2}" />
+            <TextBlock x:Name="Peer" FontFamily="{StaticResource Display}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="Summary" FontSize="12" Foreground="{StaticResource Ink2}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
           </StackPanel>
         </DockPanel>
         <c:DotTrack x:Name="Meter" Grid.Row="1" Margin="0,14,0,8" />
         <DockPanel Grid.Row="2" VerticalAlignment="Bottom">
           <StackPanel x:Name="Actions" DockPanel.Dock="Right" Orientation="Horizontal" Visibility="Collapsed" Margin="10,0,0,0">
-            <Button Style="{StaticResource GhostButton}" Content="Folder" Padding="14,7" Focusable="False" Click="Folder_Click" />
-            <Button Style="{StaticResource AccentButton}" Content="Buka" Padding="16,7" Margin="6,0,0,0" Focusable="False" Click="Open_Click" />
+            <Button Style="{StaticResource GhostButton}" Content="Folder" Padding="14,6" Focusable="False" Click="Folder_Click" />
+            <Button Style="{StaticResource PrimaryButton}" Content="Buka" Padding="16,6" Margin="6,0,0,0" Focusable="False" Click="Open_Click" />
           </StackPanel>
-          <TextBlock x:Name="Status" FontSize="12.5" Foreground="{StaticResource Ink2}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="Status" FontSize="12" Foreground="{StaticResource Ink2}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
         </DockPanel>
       </Grid>
     </Border>

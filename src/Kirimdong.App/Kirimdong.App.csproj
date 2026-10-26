@@ -12,7 +12,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <Product>kirimdong</Product>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Company>farishiddiq</Company>
     <Copyright>Copyright (c) 2026 farishiddiq</Copyright>
   </PropertyGroup>
@@ -25,6 +25,8 @@
     <Resource Include="Assets\app.ico" />
     <!-- 3D illustrations: Microsoft Fluent Emoji 3D (MIT), see THIRD-PARTY-fluentui-emoji-LICENSE.txt -->
     <Resource Include="Assets\3d\*.png" />
+    <!-- Inter (SIL OFL 1.1), see THIRD-PARTY-inter-LICENSE.txt -->
+    <Resource Include="Assets\fonts\*.ttf" />
   </ItemGroup>
 
 </Project>

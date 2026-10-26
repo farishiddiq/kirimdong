@@ -65,8 +65,10 @@ public partial class PortalWindow : Window
         var res = Application.Current.Resources;
         Card.Background = (Brush)res[hot ? "Accent" : "Dark"];
         Background = Card.Background;
-        Arrow.Foreground = (Brush)res[hot ? "OnInk" : "Accent"];
-        Prompt.Foreground = (Brush)res[hot ? "OnInk" : "DarkInk2"];
+        // On orange, text and arrow go black (7.4:1); white on orange-500 is under 3:1.
+        Arrow.Foreground = (Brush)res[hot ? "Ink" : "Accent"];
+        Prompt.Foreground = (Brush)res[hot ? "Ink" : "DarkInk2"];
+        PeerName.Foreground = (Brush)res[hot ? "Ink" : "OnInk"];
         Prompt.Text = hot ? "Lepas sekarang, terkirim ke" : "Lepas di sini untuk kirim ke";
         Hint.Visibility = hot ? Visibility.Collapsed : Visibility.Visible;
     }
