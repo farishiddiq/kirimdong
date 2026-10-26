@@ -1,59 +1,53 @@
 # kirimdong
 
-**Kirim file antar PC Windows di Wi-Fi yang sama.** Buka kirimdong di dua PC, labelnya saling muncul,
-seret file ke label tujuan, PC penerima menekan **Terima**. Tanpa akun, tanpa internet, tanpa kabel,
+**Kirim file antar PC Windows di Wi-Fi yang sama.** Buka kirimdong di dua PC, kartunya saling muncul,
+seret file ke kartu tujuan, PC penerima menekan **Terima**. Tanpa akun, tanpa internet, tanpa kabel,
 tanpa upload ke cloud.
 
-Tampilannya dibuat seperti kardus paket: tiap PC adalah label pengiriman, tiap transfer adalah slip yang
-mencatat kecepatan dan sisa waktunya.
+**Baru di 1.2:** tampilan baru. Latar putih, kartu abu-abu dengan ilustrasi 3D, tombol pill hitam dan oranye,
+lembar gelap untuk paket masuk, dan jalur pengiriman bertitik seperti pelacakan paket. Semua fitur tetap sama.
 
-**Baru di 1.1:** seret file ke **tepi layar** yang mengarah ke laptop sebelah, lepas, dan file muncul di
-layar laptop itu. Ditambah **Cek koneksi** yang memperbaiki penyebab paling umum dua laptop tidak saling
-ketemu (firewall Windows) dengan sekali klik, pencarian cadangan lewat pindai jaringan, dan transfer yang
-lebih cepat.
+**1.1:** seret file ke **tepi layar** yang mengarah ke laptop sebelah, lepas, dan file muncul di layar laptop
+itu. Plus **Cek koneksi** yang memperbaiki penyebab paling umum dua laptop tidak saling ketemu (firewall
+Windows) dengan sekali klik, pencarian cadangan lewat pindai jaringan, dan transfer yang lebih cepat.
 
 **Download:** [rilis terbaru](https://github.com/farishiddiq/kirimdong/releases/latest) (`kirimdong-<versi>-win-x64.msi`)
 
 ## Screenshots
 
-Laptop Rina melihat dua PC lain di Wi-Fi yang sama. Folder foto sudah terkirim, rekaman rapat 2,3 GB sedang masuk.
+Laptop Rina melihat PC Ruang Tamu di Wi-Fi yang sama. Folder foto sudah terkirim, rekaman rapat 2,3 GB sedang masuk.
 
-![kirimdong: dua label PC tujuan dan slip pengiriman yang sedang berjalan](promo/assets/kirimdong-main.png)
+![kirimdong: kartu PC tujuan dengan laptop 3D, pengaturan, dan daftar pengiriman dengan jalur bertitik](promo/assets/kirimdong-main.png)
 
-Paket masuk selalu ditanyakan dulu: siapa pengirimnya, isinya apa, berapa besar, dan disimpan ke mana.
+Paket masuk selalu ditanyakan dulu: isinya apa, berapa besar, disimpan ke mana, dan siapa pengirimnya.
 
-![kirimdong: kartu "Ada paket untukmu dari PC Ruang Tamu" dengan tombol Terima dan Tolak](promo/assets/kirimdong-offer.png)
-
-Belum ada PC lain yang terbuka:
-
-![kirimdong: kardus kosong, menunggu PC lain di jaringan](promo/assets/kirimdong-empty.png)
+![kirimdong: lembar gelap "Paket masuk" berisi Foto Liburan Bali dengan tombol Tolak dan Terima](promo/assets/kirimdong-offer.png)
 
 Seret file sampai tepi kanan layar: portal kirimdong terbuka di sana. Lepas, dan file terbang ke PC di sebelah
 kanan. Di laptop penerima, kartu paket masuk dari tepi yang berlawanan.
 
-![kirimdong 1.1: portal oranye di tepi kanan layar saat file diseret ke sana](promo/assets/kirimdong-portal.png)
-
-![kirimdong 1.1: kartu "Paket masuk dari Laptop Rina" di tepi kiri dan "Mengirim ke PC Ruang Tamu" di tepi kanan](promo/assets/kirimdong-portal-arrival.png)
-<p align="center">
-  <img src="promo/out/kirimdong-portrait.png" alt="Poster kirimdong: Kirim file ke PC sebelah." width="420">
+<p>
+  <img src="promo/assets/kirimdong-portal.png" alt="Portal oranye di tepi layar: Lepas sekarang, terkirim ke PC Ruang Tamu" width="200">
+  &nbsp;
+  <img src="promo/assets/kirimdong-portal-arrival.png" alt="Kartu di layar penerima: Paket masuk dari Laptop Rina, dengan Folder dan Buka" width="380">
 </p>
 
 ## Fitur
 
-- **Kirim lewat tepi layar.** Di label tiap PC, pilih tepi layarmu yang mengarah ke PC itu (kiri, atas, bawah,
+- **Kirim lewat tepi layar.** Di kartu tiap PC, pilih tepi layarmu yang mengarah ke PC itu (kiri, atas, bawah,
   kanan; PC pertama otomatis di kanan). Seret file dari Explorer, desktop, atau browser sampai menyentuh tepi
   itu, portal terbuka, lepas, terkirim. Laptop penerima menampilkan kartu kedatangan dari tepi yang berlawanan,
   lengkap dengan **Buka** dan **Folder**.
-- **PC yang dipercaya.** Centang *Langsung terima dari PC ini* di label PC itu (atau di kartu paket masuk), dan
+- **PC yang dipercaya.** Nyalakan *Langsung terima dari PC ini* di kartu PC itu (atau di kartu paket masuk), dan
   kirimannya tersimpan tanpa kartu Terima/Tolak. Ini yang membuat portal terasa mulus antar laptop milik sendiri.
 - **Cek koneksi.** Membaca jenis jaringan (Public/Private), kecepatan link Wi-Fi, dan aturan firewall Windows
   untuk kirimdong. Kalau firewall menahan kiriman masuk, banner oranye muncul dan tombol **Izinkan** memasang
   aturan firewall (Windows meminta izin admin sekali).
-- **Otomatis saling menemukan.** PC yang membuka kirimdong di jaringan yang sama muncul sebagai label dalam
+- **Otomatis saling menemukan.** PC yang membuka kirimdong di jaringan yang sama muncul sebagai kartu dalam
   beberapa detik (broadcast UDP di jaringan lokal), dan hilang lagi saat app-nya ditutup. Kalau broadcast tidak
   tembus, kirimdong memindai jaringan (subnet sampai /22) lewat TCP, dan PC yang dihubungi ikut mengenali
   pengirimnya.
-- **File dan folder.** Seret ke label, atau pakai **Pilih file** / **Folder**. Isi folder dikirim lengkap
+- **File dan folder.** Seret ke kartu PC, atau pakai **Kirim file** / **Folder**. Isi folder dikirim lengkap
   dengan susunan subfoldernya, termasuk folder kosong.
 - **Penerima yang memutuskan.** Setiap paket menampilkan pengirim, daftar file, ukuran, dan folder simpan,
   lalu menunggu **Terima** atau **Tolak** (otomatis ditolak setelah 2 menit). Opsi **Langsung terima tanpa
@@ -67,7 +61,7 @@ kanan. Di laptop penerima, kartu paket masuk dari tepi yang berlawanan.
 - **Slip pengiriman**: progres, kecepatan, sisa waktu, tombol **Batal**, dan **Buka** untuk melihat hasilnya
   di Explorer.
 - **Tambah lewat IP** untuk jaringan yang memblokir broadcast (misalnya Wi-Fi kantor atau hotel).
-- **Nama PC bisa diganti** langsung di label sendiri; PC lain melihat nama baru seketika.
+- **Nama PC bisa diganti** langsung di bar "Dari PC ini"; PC lain melihat nama baru seketika.
 
 ## Cara install
 
@@ -89,8 +83,8 @@ sudah diterima tidak ikut terhapus.
    jendela izin Windows. Lakukan di **kedua** PC. (Windows 11 mencatat Wi-Fi rumah sebagai *Public* secara
    bawaan, dan di jaringan Public firewall menolak kiriman masuk ke app yang belum diizinkan. Ini penyebab paling
    umum dua laptop tidak saling ketemu.)
-3. Label PC lain muncul di kanan. Seret file/folder ke labelnya, ke tepi layar yang dipilih di labelnya, atau
-   tekan **Pilih file**.
+3. Kartu PC lain muncul. Seret file/folder ke kartunya, ke tepi layar yang dipilih di kartunya, atau
+   tekan **Kirim file**.
 4. Di PC penerima, tekan **Terima** (atau centang *Langsung terima dari PC ini*). File masuk ke
    `Downloads\kirimdong` (bisa diganti lewat **Ganti folder**).
 
@@ -101,12 +95,12 @@ sudah diterima tidak ikut terhapus.
 3. Masih kosong: router kemungkinan memisahkan perangkat (*client isolation*, umum di Wi-Fi tamu, kantor,
    kampus). Nyalakan **Mobile hotspot** di salah satu laptop (Settings → Network & internet → Mobile hotspot)
    dan sambungkan laptop lain ke hotspot itu.
-4. Atau ketik IP PC tujuan (tertulis di labelnya) di **Tambah lewat IP**.
+4. Atau ketik IP PC tujuan (tertulis di kartunya) di **Tambah lewat IP**.
 
 ## Privasi dan keamanan
 
 - Semua lewat jaringan lokal kamu. Tidak ada server, akun, iklan, atau telemetri; app ini tidak menghubungi internet.
-- Yang dikirim ke jaringan saat app terbuka: nama PC (yang tertulis di label) dan port penerima, supaya PC lain bisa menemukannya.
+- Yang dikirim ke jaringan saat app terbuka: nama PC (yang tertulis di bar "Dari PC ini") dan port penerima, supaya PC lain bisa menemukannya.
 - Paket dari PC lain tidak disimpan sebelum kamu menekan **Terima**, kecuali dari PC yang kamu centang
   *Langsung terima*, atau kalau *Terima dari semua PC tanpa tanya* menyala. PC dikenali dari ID perangkatnya,
   yang belum diverifikasi secara kriptografis: orang lain di jaringan yang sama bisa menyamar. Paket hanya
@@ -136,13 +130,13 @@ sudah diterima tidak ikut terhapus.
 
 ## Teknologi
 
-- C# / .NET 8, WPF (tanpa library pihak ketiga). Font bawaan Windows: Bahnschrift dan Ink Free.
+- C# / .NET 8, WPF (tanpa library pihak ketiga). Font bawaan Windows: Segoe UI Variable.
 - `Kirimdong.Core`: discovery UDP (port 47800) plus pindai TCP sebagai cadangan, transfer TCP (port 47801)
   dengan protokol sederhana (header `KDNG`, penawaran JSON, aliran byte per file + SHA-256), salin double-buffer,
   pembersihan path.
-- `Kirimdong.App`: UI kardus, label, slip, kartu paket masuk, portal tepi layar (jendela non-aktif di tepi
+- `Kirimdong.App`: UI putih dengan kartu abu-abu dan ilustrasi 3D, kartu PC, kartu pengiriman bertitik, lembar paket masuk, portal tepi layar (jendela non-aktif di tepi
   layar), kartu kedatangan, dan cek koneksi (API COM Windows: Network List Manager dan Windows Firewall).
-  Tekstur kraft digambar sendiri saat start.
+  Ilustrasi 3D: [Fluent Emoji 3D](https://github.com/microsoft/fluentui-emoji) dari Microsoft (lisensi MIT, lihat `THIRD-PARTY-fluentui-emoji-LICENSE.txt`).
 - Installer: MSI per-user dengan WiX Toolset 5.
 
 ### Build dari source

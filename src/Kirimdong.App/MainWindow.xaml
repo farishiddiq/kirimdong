@@ -2,32 +2,32 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:Kirimdong.App.Controls"
-        Title="kirimdong" Width="1140" Height="760" MinWidth="920" MinHeight="620"
+        Title="kirimdong" Width="1180" Height="740" MinWidth="1000" MinHeight="600"
         WindowStartupLocation="CenterScreen" Icon="Assets/app.ico"
-        Background="{DynamicResource KraftBrush}" FontFamily="{StaticResource Display}"
-        Foreground="{StaticResource Ink}" UseLayoutRounding="True"
+        Background="{StaticResource Ground}" FontFamily="{StaticResource Text}"
+        Foreground="{StaticResource Ink}" UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale"
         TextOptions.TextFormattingMode="Display">
   <WindowChrome.WindowChrome>
-    <WindowChrome CaptionHeight="64" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    <WindowChrome CaptionHeight="56" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
   </WindowChrome.WindowChrome>
 
   <Window.Resources>
     <c:EdgeBrush x:Key="EdgeFill" />
     <c:EdgeBrush x:Key="EdgeGlyph" Glyph="True" />
 
-    <!-- One of four arrows on a peer label: which edge of this screen leads to that PC. -->
+    <!-- One of four arrows on a PC tile: which edge of this screen leads to that PC. -->
     <Style x:Key="EdgeButton" TargetType="Button">
       <Setter Property="Width" Value="30" />
       <Setter Property="Height" Value="26" />
       <Setter Property="Margin" Value="4,0,0,0" />
       <Setter Property="FontFamily" Value="{StaticResource Glyphs}" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="11" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="b" Background="{TemplateBinding Background}">
+            <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="8">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
             <ControlTemplate.Triggers>
@@ -40,44 +40,37 @@
       </Setter>
     </Style>
 
-    <!-- A PC on the same Wi-Fi, as the address label of a parcel. Drop files on it to send. -->
+    <Style x:Key="Label" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="Foreground" Value="{StaticResource Ink2}" />
+    </Style>
+
+    <!-- A PC on the same Wi-Fi: a grey service tile with a 3D laptop. Drop files on it to send. -->
     <DataTemplate x:Key="PeerLabel">
-      <Grid Width="300" Height="262" Margin="0,0,22,22" AllowDrop="True" Background="Transparent"
-            DragEnter="Peer_DragEnter" DragOver="Peer_DragOver" DragLeave="Peer_DragLeave" Drop="Peer_Drop"
-            RenderTransformOrigin="0.5,0.5">
-        <Grid.RenderTransform><RotateTransform x:Name="tilt" Angle="0" /></Grid.RenderTransform>
-        <Grid.Triggers>
-          <EventTrigger RoutedEvent="MouseEnter">
-            <BeginStoryboard>
-              <Storyboard><DoubleAnimation Storyboard.TargetName="tilt" Storyboard.TargetProperty="Angle" To="-1.2" Duration="0:0:0.18" /></Storyboard>
-            </BeginStoryboard>
-          </EventTrigger>
-          <EventTrigger RoutedEvent="MouseLeave">
-            <BeginStoryboard>
-              <Storyboard><DoubleAnimation Storyboard.TargetName="tilt" Storyboard.TargetProperty="Angle" To="0" Duration="0:0:0.22" /></Storyboard>
-            </BeginStoryboard>
-          </EventTrigger>
-        </Grid.Triggers>
-        <c:PaperCard Fill="{DynamicResource PaperBrush}" Notch="12">
-          <Grid Margin="22,16,22,16">
+      <Grid Width="284" Height="250" Margin="0,0,14,14" AllowDrop="True" Background="Transparent"
+            DragEnter="Peer_DragEnter" DragOver="Peer_DragOver" DragLeave="Peer_DragLeave" Drop="Peer_Drop">
+        <Border x:Name="tile" Background="{StaticResource Tile}" CornerRadius="20" Padding="18,16,18,16">
+          <Grid>
             <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
               <RowDefinition Height="*" />
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <DockPanel>
-              <TextBlock DockPanel.Dock="Right" Text="{Binding Address}" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
-              <TextBlock Text="Kepada" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
-            </DockPanel>
-            <TextBlock Grid.Row="1" Text="{Binding Name}" FontFamily="{StaticResource Hand}" FontSize="32" FontWeight="Bold"
-                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTip="{Binding Name}" />
-            <StackPanel Grid.Row="2" Orientation="Horizontal">
-              <Button Style="{StaticResource InkButton}" Content="Pilih file" Click="PickFiles_Click" />
-              <Button Style="{StaticResource KraftButton}" Content="Folder" Margin="8,0,0,0" Click="PickFolder_Click" />
+            <Image Source="{StaticResource ImgLaptop}" Width="86" Height="86" HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Margin="0,-8,-6,0" Grid.RowSpan="3" RenderOptions.BitmapScalingMode="HighQuality" />
+            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource Display}" FontSize="20" FontWeight="SemiBold"
+                       TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" Margin="0,0,88,0" ToolTip="{Binding Name}" />
+            <TextBlock Grid.Row="1" Style="{StaticResource Label}" Margin="0,4,0,0">
+              <Run Text="Kepada ·" /> <Run Text="{Binding Address, Mode=OneWay}" />
+            </TextBlock>
+            <StackPanel Grid.Row="3" Orientation="Horizontal">
+              <Button Style="{StaticResource PrimaryButton}" Content="Kirim file" Click="PickFiles_Click" />
+              <Button Style="{StaticResource WhiteButton}" Content="Folder" Margin="8,0,0,0" Click="PickFolder_Click" />
             </StackPanel>
-            <DockPanel Grid.Row="3" Margin="0,14,0,0">
+            <DockPanel Grid.Row="4" Margin="0,14,0,0">
               <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                 <Button Style="{StaticResource EdgeButton}" Tag="left" Content="&#xE76B;" Click="Edge_Click" ToolTip="PC ini ada di kiri layarmu"
                         Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=left}"
@@ -92,58 +85,72 @@
                         Background="{Binding Edge, Converter={StaticResource EdgeFill}, ConverterParameter=right}"
                         Foreground="{Binding Edge, Converter={StaticResource EdgeGlyph}, ConverterParameter=right}" />
               </StackPanel>
-              <TextBlock Text="Tepi layar" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" VerticalAlignment="Center" />
+              <TextBlock Text="Tepi layar" Style="{StaticResource Label}" VerticalAlignment="Center" />
             </DockPanel>
-            <CheckBox Grid.Row="4" Style="{StaticResource Tick}" FontSize="13" Margin="0,10,0,0" IsChecked="{Binding IsTrusted, Mode=TwoWay}"
+            <CheckBox Grid.Row="5" Style="{StaticResource Switch}" Margin="0,10,0,0" IsChecked="{Binding IsTrusted, Mode=TwoWay}"
                       ToolTip="Paket dari PC ini langsung disimpan tanpa kartu Terima/Tolak">
-              <TextBlock Text="Langsung terima dari PC ini" />
+              <TextBlock Text="Langsung terima dari PC ini" FontSize="12.5" Foreground="{StaticResource Ink2}" />
             </CheckBox>
           </Grid>
-        </c:PaperCard>
-        <c:PaperCard Fill="{StaticResource Accent}" Notch="12" IsHitTestVisible="False"
-                     Visibility="{Binding IsDropTarget, Converter={StaticResource Visible}}">
-          <StackPanel VerticalAlignment="Center" Margin="22,0">
-            <TextBlock Text="Lepas untuk kirim" FontSize="30" FontWeight="Bold" FontStretch="Condensed" />
-            <TextBlock Text="{Binding Name}" FontFamily="{StaticResource Hand}" FontSize="24" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-          </StackPanel>
-        </c:PaperCard>
+        </Border>
+        <!-- Something is being dragged over it: the black tile with the orange arrow. -->
+        <Border Background="{StaticResource Ink}" CornerRadius="20" Padding="22" IsHitTestVisible="False"
+                Visibility="{Binding IsDropTarget, Converter={StaticResource Visible}}">
+          <Grid>
+            <StackPanel>
+              <TextBlock Text="Lepas untuk kirim" FontFamily="{StaticResource Display}" FontSize="24" FontWeight="SemiBold" Foreground="{StaticResource OnInk}" />
+              <TextBlock Text="{Binding Name}" FontSize="15" Foreground="{StaticResource DarkInk2}" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
+            </StackPanel>
+            <TextBlock Text="&#xE72A;" FontFamily="{StaticResource Glyphs}" FontSize="52" Foreground="{StaticResource Accent}"
+                       HorizontalAlignment="Right" VerticalAlignment="Bottom" />
+          </Grid>
+        </Border>
       </Grid>
+      <DataTemplate.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter TargetName="tile" Property="Background" Value="{StaticResource TileHover}" />
+        </Trigger>
+      </DataTemplate.Triggers>
     </DataTemplate>
 
-    <!-- A transfer as a tear-off delivery slip. -->
+    <!-- A transfer, like a shipment card: what, where to, the dotted track and its status. -->
     <DataTemplate x:Key="Slip">
-      <c:PaperCard Fill="{DynamicResource PaperBrush}" Notch="8" Punched="True" HoleBrush="{StaticResource KraftFlat}" Margin="0,0,10,10" MinHeight="84">
-        <Grid Margin="34,12,18,12">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="190" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center">
-            <TextBlock Text="{Binding Direction}" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
-            <TextBlock Text="{Binding PeerName}" FontFamily="{StaticResource Hand}" FontSize="22" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-          </StackPanel>
-          <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,18,0">
-            <TextBlock Text="{Binding Summary}" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Summary}" />
-            <ProgressBar x:Name="meter" Style="{StaticResource Meter}" Value="{Binding Progress, Mode=OneWay}" Margin="0,7,0,6" />
-            <TextBlock Text="{Binding Status}" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Status}" />
-          </StackPanel>
-          <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-            <Button Style="{StaticResource KraftButton}" Content="Batal" Click="Cancel_Click"
-                    Visibility="{Binding IsActive, Converter={StaticResource Visible}}" />
-            <Button Style="{StaticResource InkButton}" Content="Buka" Click="Open_Click"
-                    Visibility="{Binding CanOpen, Converter={StaticResource Visible}}" />
-            <Button Style="{StaticResource WordButton}" Content="Hapus" Margin="14,0,0,0" VerticalAlignment="Center" Click="Dismiss_Click"
+      <Border Background="#F6F6F6" CornerRadius="18" Padding="16,14,16,14" Margin="0,0,0,12">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+          <DockPanel>
+            <Border DockPanel.Dock="Right" Style="{StaticResource Badge}" Background="{StaticResource Card}" Margin="8,2,0,0">
+              <TextBlock Text="{Binding Badge}" FontSize="11.5" FontWeight="SemiBold" />
+            </Border>
+            <Border Width="44" Height="44" CornerRadius="22" Background="{StaticResource Card}" VerticalAlignment="Top">
+              <Image x:Name="icon" Source="{StaticResource ImgEnvelope}" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
+            </Border>
+            <StackPanel Margin="12,1,0,0">
+              <TextBlock Text="{Binding Summary}" FontSize="14.5" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding Summary}" />
+              <TextBlock Text="{Binding Route}" Style="{StaticResource Label}" Margin="0,2,0,0" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </DockPanel>
+          <c:DotTrack Grid.Row="1" Margin="0,14,0,8" Value="{Binding Progress, Mode=OneWay}" IsDone="{Binding IsDone, Mode=OneWay}"
+                      IsProblem="{Binding IsProblem, Mode=OneWay}" />
+          <TextBlock Grid.Row="2" Text="{Binding Status}" Style="{StaticResource Label}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Status}" />
+          <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+            <Button Style="{StaticResource WordButton}" Content="Hapus" Margin="0,0,14,0" VerticalAlignment="Center" Click="Dismiss_Click"
                     Visibility="{Binding CanDismiss, Converter={StaticResource Visible}}" ToolTip="Hapus dari daftar (file tidak ikut terhapus)" />
+            <Button Style="{StaticResource WhiteButton}" Content="Batal" Padding="14,6" Click="Cancel_Click"
+                    Visibility="{Binding IsActive, Converter={StaticResource Visible}}" />
+            <Button Style="{StaticResource AccentButton}" Content="Buka" Padding="16,6" Click="Open_Click"
+                    Visibility="{Binding CanOpen, Converter={StaticResource Visible}}" />
           </StackPanel>
         </Grid>
-      </c:PaperCard>
+      </Border>
       <DataTemplate.Triggers>
-        <DataTrigger Binding="{Binding IsDone}" Value="True">
-          <Setter TargetName="meter" Property="Foreground" Value="{StaticResource Accent}" />
-        </DataTrigger>
-        <DataTrigger Binding="{Binding IsProblem}" Value="True">
-          <Setter TargetName="meter" Property="Foreground" Value="#8A8F94" />
+        <DataTrigger Binding="{Binding IsSend}" Value="True">
+          <Setter TargetName="icon" Property="Source" Value="{StaticResource ImgPackage}" />
         </DataTrigger>
       </DataTemplate.Triggers>
     </DataTemplate>
@@ -151,232 +158,287 @@
 
   <Grid x:Name="Frame">
     <Grid.RowDefinitions>
-      <RowDefinition Height="72" />
+      <RowDefinition Height="56" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <!-- Title: the name stamped on the box. -->
-    <DockPanel Margin="32,0,0,0">
+    <DockPanel Margin="24,0,0,0">
       <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
         <Button Style="{StaticResource ChromeButton}" Content="&#xE921;" Click="Minimize_Click" ToolTip="Kecilkan" />
         <Button x:Name="MaxButton" Style="{StaticResource ChromeButton}" Content="&#xE922;" Click="Maximize_Click" ToolTip="Besarkan" />
         <Button Style="{StaticResource CloseButton}" Content="&#xE8BB;" Click="Close_Click" ToolTip="Tutup" />
       </StackPanel>
-      <TextBlock Text="kirimdong" FontSize="46" FontWeight="Bold" FontStretch="SemiCondensed" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+      <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+        <Image Source="{StaticResource ImgPackage}" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
+        <TextBlock Text="kirimdong" FontFamily="{StaticResource Display}" FontSize="19" FontWeight="Bold" Margin="10,0,0,1" VerticalAlignment="Center" />
+      </StackPanel>
     </DockPanel>
 
-    <Grid Grid.Row="1" Margin="32,18,32,28">
+    <Grid Grid.Row="1" Margin="24,0,24,22">
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="340" />
-        <ColumnDefinition Width="40" />
         <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="22" />
+        <ColumnDefinition Width="370" />
       </Grid.ColumnDefinitions>
 
-      <!-- This PC: the sender's label, taped on. -->
-      <Grid>
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <c:PaperCard Fill="{DynamicResource PaperBrush}" Notch="14" Margin="0,14,0,0">
-          <StackPanel>
-            <c:Barcode x:Name="MyBarcode" Height="54" Margin="22,26,22,0" Ink="{StaticResource Ink}" />
-            <StackPanel Margin="22,18,22,22">
-              <TextBlock Text="Dari PC ini" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
-              <TextBox x:Name="NameBox" FontFamily="{StaticResource Hand}" FontSize="34" FontWeight="Bold" Background="Transparent"
-                       BorderThickness="0,0,0,2" BorderBrush="Transparent" Padding="0,2" Foreground="{StaticResource Ink}"
-                       CaretBrush="{StaticResource Ink}" SelectionBrush="{StaticResource Accent}" MaxLength="40"
-                       ToolTip="Klik untuk ganti nama yang dilihat PC lain" KeyDown="NameBox_KeyDown" LostKeyboardFocus="NameBox_LostFocus">
-                <TextBox.Template>
-                  <ControlTemplate TargetType="TextBox">
-                    <Border x:Name="line" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="Transparent">
-                      <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                      <Trigger Property="IsMouseOver" Value="True">
-                        <Setter TargetName="line" Property="BorderBrush" Value="{StaticResource KraftLight}" />
-                      </Trigger>
-                      <Trigger Property="IsKeyboardFocused" Value="True">
-                        <Setter TargetName="line" Property="BorderBrush" Value="{StaticResource Accent}" />
-                      </Trigger>
-                    </ControlTemplate.Triggers>
-                  </ControlTemplate>
-                </TextBox.Template>
-              </TextBox>
-              <TextBlock x:Name="MyAddress" FontSize="15" Margin="0,4,0,0" TextWrapping="Wrap" />
-
-              <TextBlock Text="Paket masuk disimpan di" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,22,0,2" />
-              <TextBlock x:Name="SaveFolderText" FontSize="15" TextTrimming="CharacterEllipsis" />
-              <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-                <Button Style="{StaticResource WordButton}" Content="Ganti folder" Click="ChangeFolder_Click" />
-                <Button Style="{StaticResource WordButton}" Content="Buka folder" Margin="18,0,0,0" Click="OpenSaveFolder_Click" />
-              </StackPanel>
-
-              <CheckBox x:Name="AutoAcceptBox" Style="{StaticResource Tick}" Margin="0,22,0,0" Checked="AutoAccept_Changed" Unchecked="AutoAccept_Changed">
-                <TextBlock Text="Terima dari semua PC tanpa tanya" TextWrapping="Wrap" />
-              </CheckBox>
-              <CheckBox x:Name="PortalBox" Style="{StaticResource Tick}" Margin="0,12,0,0" Checked="Portal_Changed" Unchecked="Portal_Changed"
-                        ToolTip="Seret file ke tepi layar yang kamu pilih di label PC tujuan">
-                <TextBlock Text="Kirim lewat tepi layar" TextWrapping="Wrap" />
-              </CheckBox>
-            </StackPanel>
-          </StackPanel>
-        </c:PaperCard>
-        <c:Tape Width="150" Height="30" Fill="{StaticResource TapeBrush}" HorizontalAlignment="Left" VerticalAlignment="Top"
-                Margin="96,0,0,0" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5">
-          <c:Tape.RenderTransform><RotateTransform Angle="-3" /></c:Tape.RenderTransform>
-        </c:Tape>
-
-        <!-- Add a PC by address, for networks that block broadcasts. -->
-        <c:PaperCard Grid.Row="2" Fill="{DynamicResource KraftDarkBrush}" Notch="10">
-          <StackPanel Margin="20,16,20,18">
-            <DockPanel>
-              <Button DockPanel.Dock="Right" Style="{StaticResource WordButton}" Content="Cek koneksi" Click="CheckConnection_Click" VerticalAlignment="Center" />
-              <TextBlock Text="PC tidak muncul?" FontSize="15" FontWeight="SemiBold" />
-            </DockPanel>
-            <TextBlock Text="Tambah lewat IP" FontSize="13" Foreground="{StaticResource InkOnKraftMuted}" Margin="0,2,0,0" />
-            <DockPanel Margin="0,10,0,0">
-              <Button DockPanel.Dock="Right" Style="{StaticResource InkButton}" Content="Tambah" Click="AddByIp_Click" IsDefault="False" />
-              <TextBox x:Name="IpBox" Style="{StaticResource Field}" Margin="0,0,8,0" KeyDown="IpBox_KeyDown" ToolTip="Contoh: 192.168.1.20" />
-            </DockPanel>
-            <TextBlock x:Name="IpStatus" FontSize="13" Foreground="{StaticResource InkOnKraftMuted}" TextWrapping="Wrap" Margin="0,8,0,0"
-                       Text="Lihat IP di label PC tujuan, contoh 192.168.1.20" />
-          </StackPanel>
-        </c:PaperCard>
-      </Grid>
-
-      <!-- Other PCs and the slips of what is moving. -->
-      <Grid Grid.Column="2">
-        <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="*" />
-          <RowDefinition Height="Auto" />
-          <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
+      <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False" Padding="0,0,10,0">
         <StackPanel>
-          <!-- Shown when Windows Firewall keeps other PCs out: the usual reason two laptops cannot see each other. -->
-          <c:PaperCard x:Name="FirewallBanner" Fill="{StaticResource Accent}" Notch="10" Margin="0,0,10,14" Visibility="Collapsed">
-            <DockPanel Margin="20,14,16,14">
-              <Button x:Name="BannerButton" DockPanel.Dock="Right" Style="{StaticResource InkButton}" Content="Izinkan" Click="FixFirewall_Click"
-                      VerticalAlignment="Center" Margin="16,0,0,0" />
-              <StackPanel>
-                <TextBlock Text="PC lain belum bisa menghubungi PC ini" FontSize="17" FontWeight="SemiBold" />
-                <TextBlock x:Name="BannerText" FontSize="14" TextWrapping="Wrap" Margin="0,3,0,0" />
+          <!-- Windows Firewall keeps other PCs out: the black tile, the usual reason two laptops cannot see each other. -->
+          <Border x:Name="FirewallBanner" Background="{StaticResource Dark}" CornerRadius="20" Padding="18,16,18,16" Margin="0,0,0,16" Visibility="Collapsed">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Image Source="{StaticResource ImgShield}" Width="52" Height="52" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+              <StackPanel Grid.Column="1" Margin="14,0,16,0" VerticalAlignment="Center">
+                <TextBlock Text="PC lain belum bisa menghubungi PC ini" FontFamily="{StaticResource Display}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource OnInk}" />
+                <TextBlock x:Name="BannerText" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0" Foreground="{StaticResource DarkInk2}" />
               </StackPanel>
-            </DockPanel>
-          </c:PaperCard>
-          <DockPanel Margin="0,8,0,18">
-            <TextBlock x:Name="PeerCount" DockPanel.Dock="Right" FontSize="15" VerticalAlignment="Bottom" Foreground="{StaticResource InkOnKraftMuted}" />
-            <StackPanel>
-              <TextBlock Text="Kirim ke PC di Wi-Fi yang sama" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
-              <TextBlock x:Name="HowTo" Text="Seret file ke label tujuan, atau ke tepi layar yang dipilih di labelnya." FontSize="15" Margin="0,4,0,0" />
+              <Button x:Name="BannerButton" Grid.Column="2" Style="{StaticResource AccentButton}" Content="Izinkan" Click="FixFirewall_Click" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+
+          <TextBlock Text="Kirim ke mana?" FontFamily="{StaticResource Display}" FontSize="32" FontWeight="Bold" Margin="0,2,0,14" />
+
+          <!-- This PC, as the "From … / Where to?" bar. The name is edited in place. -->
+          <Border Background="{StaticResource Tile}" CornerRadius="18" Padding="12,10,18,10">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Image Source="{StaticResource ImgDesktop}" Width="48" Height="48" RenderOptions.BitmapScalingMode="HighQuality" />
+              <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                <TextBlock Style="{StaticResource Label}">
+                  <Run Text="Dari PC ini ·" /> <Run x:Name="MyAddress" />
+                </TextBlock>
+                <TextBox x:Name="NameBox" Style="{StaticResource Field}" FontFamily="{StaticResource Display}" FontSize="18" FontWeight="SemiBold"
+                         MaxLength="40" Margin="0,1,0,0" ToolTip="Klik untuk ganti nama yang dilihat PC lain"
+                         KeyDown="NameBox_KeyDown" LostKeyboardFocus="NameBox_LostFocus" />
+              </StackPanel>
+              <Rectangle Grid.Column="2" Width="1" Height="26" Fill="{StaticResource Ink3}" Margin="14,0" />
+              <Button Grid.Column="3" Style="{StaticResource WordButton}" Foreground="{StaticResource Ink}" FontWeight="SemiBold" Content="Cek koneksi"
+                      VerticalAlignment="Center" Click="CheckConnection_Click" />
+            </Grid>
+          </Border>
+
+          <DockPanel Margin="0,26,0,2">
+            <TextBlock x:Name="PeerCount" DockPanel.Dock="Right" FontSize="13" Foreground="{StaticResource Ink2}" VerticalAlignment="Bottom" />
+            <TextBlock Text="PC di Wi-Fi yang sama" FontFamily="{StaticResource Display}" FontSize="20" FontWeight="SemiBold" />
+          </DockPanel>
+          <TextBlock x:Name="HowTo" Style="{StaticResource Label}" FontSize="13" Margin="0,0,0,14"
+                     Text="Seret file ke kartu PC tujuan, atau ke tepi layar yang dipilih di kartunya." />
+
+          <Grid>
+            <ItemsControl x:Name="PeerList" ItemTemplate="{StaticResource PeerLabel}" Focusable="False">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <!-- Nobody yet. -->
+            <Border x:Name="EmptyState" Background="{StaticResource Tile}" CornerRadius="20" Padding="24,20" Margin="0,0,14,14">
+              <Grid>
+                <StackPanel Margin="0,0,170,0" VerticalAlignment="Center">
+                  <TextBlock Text="Belum ada PC lain" FontFamily="{StaticResource Display}" FontSize="22" FontWeight="SemiBold" />
+                  <TextBlock FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="20">
+                    Buka kirimdong di PC lain yang tersambung ke Wi-Fi yang sama. Kartunya muncul di sini dalam beberapa detik.
+                  </TextBlock>
+                  <TextBlock FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,8,0,0" LineHeight="20">
+                    Masih kosong? Tekan Cek koneksi, di kedua PC.
+                  </TextBlock>
+                </StackPanel>
+                <Image Source="{StaticResource ImgPackage}" Width="140" Height="140" HorizontalAlignment="Right" VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+              </Grid>
+            </Border>
+          </Grid>
+
+          <TextBlock Text="Pengaturan" FontFamily="{StaticResource Display}" FontSize="20" FontWeight="SemiBold" Margin="0,16,0,12" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Background="{StaticResource Tile}" CornerRadius="18" Padding="14,12,14,12">
+              <StackPanel>
+                <Image Source="{StaticResource ImgFolder}" Width="44" Height="44" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Text="Folder simpan" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                <TextBlock x:Name="SaveFolderText" Style="{StaticResource Label}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                  <Button Style="{StaticResource WordButton}" Foreground="{StaticResource Ink}" Content="Buka" Click="OpenSaveFolder_Click" />
+                  <Button Style="{StaticResource WordButton}" Foreground="{StaticResource Ink}" Content="Ganti" Margin="14,0,0,0" Click="ChangeFolder_Click" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="{StaticResource Tile}" CornerRadius="18" Padding="14,12,14,12">
+              <StackPanel>
+                <DockPanel>
+                  <CheckBox x:Name="AutoAcceptBox" DockPanel.Dock="Right" Style="{StaticResource Switch}" VerticalAlignment="Top"
+                            Checked="AutoAccept_Changed" Unchecked="AutoAccept_Changed" ToolTip="Terima otomatis dari semua PC" />
+                  <Image Source="{StaticResource ImgInbox}" Width="44" Height="44" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                </DockPanel>
+                <TextBlock Text="Terima otomatis" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                <TextBlock Text="dari semua PC, tanpa tanya" Style="{StaticResource Label}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+            </Border>
+
+            <Border Grid.Column="4" Background="{StaticResource Tile}" CornerRadius="18" Padding="14,12,14,12">
+              <StackPanel>
+                <DockPanel>
+                  <CheckBox x:Name="PortalBox" DockPanel.Dock="Right" Style="{StaticResource Switch}" VerticalAlignment="Top"
+                            Checked="Portal_Changed" Unchecked="Portal_Changed" ToolTip="Seret file ke tepi layar yang kamu pilih di kartu PC tujuan" />
+                  <Image Source="{StaticResource ImgEdges}" Width="44" Height="44" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                </DockPanel>
+                <TextBlock Text="Kirim lewat tepi layar" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" TextWrapping="Wrap" />
+                <TextBlock Text="seret file ke tepi layar" Style="{StaticResource Label}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+            </Border>
+
+            <Button Grid.Column="6" Style="{StaticResource TileButton}" Padding="14,12,14,12" Click="CheckConnection_Click">
+              <StackPanel>
+                <Image Source="{StaticResource ImgAntenna}" Width="44" Height="44" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Text="Cek koneksi" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                <TextBlock Text="firewall, Wi-Fi, pindai" Style="{StaticResource Label}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <!-- Add a PC by address, for networks that block broadcasts: a search-style pill. -->
+          <TextBlock Text="PC tidak muncul? Tambah lewat IP" FontSize="14" FontWeight="SemiBold" Margin="0,22,0,10" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Background="{StaticResource Tile}" CornerRadius="24" Height="48" Padding="18,0">
+              <DockPanel>
+                <TextBlock Text="&#xE721;" FontFamily="{StaticResource Glyphs}" FontSize="15" Foreground="{StaticResource Ink2}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <TextBox x:Name="IpBox" Style="{StaticResource Field}" KeyDown="IpBox_KeyDown" ToolTip="Contoh: 192.168.1.20" />
+              </DockPanel>
+            </Border>
+            <Button Grid.Column="1" Style="{StaticResource PrimaryButton}" Content="Tambah" Height="48" Padding="24,0" Margin="10,0,0,0" Click="AddByIp_Click" />
+          </Grid>
+          <TextBlock x:Name="IpStatus" Style="{StaticResource Label}" TextWrapping="Wrap" Margin="18,8,0,6"
+                     Text="Lihat IP di kartu PC tujuan, contoh 192.168.1.20" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Shipments: what is moving and what arrived. -->
+      <Border Grid.Column="2" Background="{StaticResource Card}" CornerRadius="24" Padding="20,18,16,6" Effect="{StaticResource Lift}">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <DockPanel Margin="0,0,4,14">
+            <Image DockPanel.Dock="Right" Source="{StaticResource ImgTruck}" Width="54" Height="54" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Pengiriman" FontFamily="{StaticResource Display}" FontSize="22" FontWeight="SemiBold" />
+              <TextBlock Text="Yang dikirim dan diterima" Style="{StaticResource Label}" FontSize="13" Margin="0,2,0,0" />
             </StackPanel>
           </DockPanel>
-        </StackPanel>
-
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
-          <ItemsControl x:Name="PeerList" ItemTemplate="{StaticResource PeerLabel}" Focusable="False">
-            <ItemsControl.ItemsPanel>
-              <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-          </ItemsControl>
-        </ScrollViewer>
-
-        <!-- Nobody yet: the empty box, waiting. -->
-        <Grid x:Name="EmptyState" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,10,0,0">
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-          </Grid.ColumnDefinitions>
-          <Canvas Width="220" Height="190">
-            <!-- open box, front view: inside, flaps, front panel, tape -->
-            <Polygon Points="30,70 190,70 190,96 30,96" Fill="#4A2F14" />
-            <Polygon Points="30,70 4,30 92,30 110,70" Fill="#B7884E" />
-            <Polygon Points="190,70 216,30 128,30 110,70" Fill="#A2733B" />
-            <Polygon Points="22,88 198,88 198,184 22,184" Fill="#B98A50" />
-            <Polygon Points="22,88 198,88 198,98 22,98" Fill="#A57640" />
-            <Polygon Points="96,88 124,88 124,184 96,184" Fill="{StaticResource TapeBrush}" />
-            <Polygon Points="140,128 186,128 186,170 140,170" Fill="{StaticResource Accent}" />
-            <Polygon Points="148,138 151,138 151,162 148,162" Fill="{StaticResource Ink}" />
-            <Polygon Points="155,138 160,138 160,162 155,162" Fill="{StaticResource Ink}" />
-            <Polygon Points="164,138 166,138 166,162 164,162" Fill="{StaticResource Ink}" />
-            <Polygon Points="170,138 177,138 177,162 170,162" Fill="{StaticResource Ink}" />
-          </Canvas>
-          <StackPanel Grid.Column="1" Margin="30,18,0,0" MaxWidth="420">
-            <TextBlock Text="Belum ada PC lain" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
-            <TextBlock FontSize="15" TextWrapping="Wrap" Margin="0,10,0,0" LineHeight="23">
-              Buka kirimdong di PC lain yang tersambung ke Wi-Fi yang sama. Labelnya muncul di sini dalam beberapa detik.
-            </TextBlock>
-            <TextBlock FontSize="15" TextWrapping="Wrap" Margin="0,12,0,0" LineHeight="23">
-              Masih kosong setelah PC lain dibuka? Tekan Cek koneksi di kiri bawah, di kedua PC.
-            </TextBlock>
-          </StackPanel>
+          <Border x:Name="NoSlips" Grid.Row="1" Background="#F6F6F6" CornerRadius="18" Padding="18,16" VerticalAlignment="Top" Margin="0,0,4,0">
+            <StackPanel>
+              <c:DotTrack Value="0" Margin="0,0,0,12" />
+              <TextBlock FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" LineHeight="20"
+                         Text="Belum ada paket. Semua yang kamu kirim dan terima tercatat di sini, lengkap dengan kecepatan dan sisa waktunya." />
+            </StackPanel>
+          </Border>
+          <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False" Padding="0,0,4,0">
+            <ItemsControl x:Name="SlipList" ItemTemplate="{StaticResource Slip}" Focusable="False" />
+          </ScrollViewer>
         </Grid>
-
-        <TextBlock Grid.Row="2" Text="Pengiriman" FontSize="22" FontWeight="SemiBold" FontStretch="SemiCondensed" Margin="0,4,0,12" />
-        <c:PaperCard x:Name="NoSlips" Grid.Row="3" Fill="{DynamicResource KraftDarkBrush}" Notch="10" VerticalAlignment="Top" Margin="0,0,10,0">
-          <TextBlock Margin="22,18" FontSize="15" TextWrapping="Wrap"
-                     Text="Belum ada paket. Semua yang kamu kirim dan terima tercatat di sini, lengkap dengan kecepatan dan sisa waktunya." />
-        </c:PaperCard>
-        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Focusable="False" MaxHeight="290">
-          <ItemsControl x:Name="SlipList" ItemTemplate="{StaticResource Slip}" Focusable="False" />
-        </ScrollViewer>
-      </Grid>
+      </Border>
     </Grid>
 
-    <!-- An incoming parcel: everything else waits under a scrim. -->
+    <!-- An incoming parcel: the dark shipment sheet. -->
     <Grid x:Name="OfferLayer" Grid.RowSpan="2" Background="{StaticResource Scrim}" Visibility="Collapsed">
-      <Grid Width="520" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <c:PaperCard Fill="{DynamicResource PaperBrush}" Notch="16">
-          <StackPanel>
-            <c:Barcode x:Name="OfferBarcode" Height="50" Margin="28,30,28,0" Ink="{StaticResource Ink}" />
-            <StackPanel Margin="28,20,28,26">
-              <TextBlock Text="Ada paket untukmu dari" FontSize="15" Foreground="{StaticResource InkOnPaperMuted}" />
-              <TextBlock x:Name="OfferSender" FontFamily="{StaticResource Hand}" FontSize="40" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-              <TextBlock x:Name="OfferSummary" FontSize="22" FontWeight="SemiBold" Margin="0,12,0,0" TextTrimming="CharacterEllipsis" />
-              <TextBlock x:Name="OfferSize" FontSize="15" Margin="0,2,0,0" />
-              <ItemsControl x:Name="OfferFiles" Margin="0,12,0,0">
+      <Border Width="540" Background="{StaticResource Dark}" CornerRadius="26" Padding="26,22,26,22" HorizontalAlignment="Center" VerticalAlignment="Center"
+              Effect="{StaticResource LiftStrong}">
+        <StackPanel>
+          <DockPanel>
+            <Border DockPanel.Dock="Right" Style="{StaticResource Badge}" Background="{StaticResource DarkTile}">
+              <TextBlock x:Name="OfferCountdown" FontSize="11.5" Foreground="{StaticResource OnInk}" />
+            </Border>
+            <TextBlock Text="Paket masuk" FontSize="13" Foreground="{StaticResource DarkInk2}" VerticalAlignment="Center" />
+          </DockPanel>
+          <TextBlock x:Name="OfferSummary" FontFamily="{StaticResource Display}" FontSize="26" FontWeight="SemiBold" Foreground="{StaticResource OnInk}"
+                     TextTrimming="CharacterEllipsis" Margin="0,6,0,0" />
+          <c:DotTrack OnDark="True" Value="0" Margin="0,16,0,16" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock Text="Isi" FontSize="12" Foreground="{StaticResource DarkInk2}" />
+              <TextBlock x:Name="OfferSize" FontSize="14.5" Foreground="{StaticResource OnInk}" Margin="0,2,0,12" TextWrapping="Wrap" />
+              <TextBlock Text="Disimpan ke" FontSize="12" Foreground="{StaticResource DarkInk2}" />
+              <TextBlock x:Name="OfferFolder" FontSize="13" Foreground="{StaticResource OnInk}" Margin="0,2,0,12" TextTrimming="CharacterEllipsis" />
+              <ItemsControl x:Name="OfferFiles">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>
-                    <TextBlock Text="{Binding}" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" TextTrimming="CharacterEllipsis" Margin="0,1" />
+                    <TextBlock Text="{Binding}" FontSize="12" Foreground="{StaticResource DarkInk2}" TextTrimming="CharacterEllipsis" Margin="0,1" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
-              <TextBlock x:Name="OfferMore" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" />
-              <TextBlock x:Name="OfferFolder" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,12,0,0" TextTrimming="CharacterEllipsis" />
-              <CheckBox x:Name="OfferTrust" Style="{StaticResource Tick}" FontSize="14" Margin="0,16,0,0">
-                <TextBlock x:Name="OfferTrustText" Text="Lain kali langsung terima dari PC ini" />
-              </CheckBox>
-              <DockPanel Margin="0,18,0,0">
-                <StackPanel Orientation="Horizontal">
-                  <Button x:Name="AcceptButton" Style="{StaticResource InkButton}" Content="Terima" FontSize="17" Padding="26,11" Click="Accept_Click" />
-                  <Button Style="{StaticResource KraftButton}" Content="Tolak" FontSize="17" Padding="22,11" Margin="10,0,0,0" Click="Decline_Click" />
-                </StackPanel>
-                <TextBlock x:Name="OfferCountdown" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" VerticalAlignment="Center" HorizontalAlignment="Right" />
-              </DockPanel>
+              <TextBlock x:Name="OfferMore" FontSize="12" Foreground="{StaticResource DarkInk2}" />
             </StackPanel>
-          </StackPanel>
-        </c:PaperCard>
-        <c:Tape Width="130" Height="30" Fill="{StaticResource TapeBrush}" HorizontalAlignment="Right" VerticalAlignment="Top"
-                Margin="0,-12,60,0" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5">
-          <c:Tape.RenderTransform><RotateTransform Angle="4" /></c:Tape.RenderTransform>
-        </c:Tape>
-      </Grid>
+            <Image Grid.Column="1" Source="{StaticResource ImgPackage}" Width="128" Height="128" VerticalAlignment="Top" Margin="12,-6,-8,0"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+          </Grid>
+          <CheckBox x:Name="OfferTrust" Style="{StaticResource DarkSwitch}" Margin="0,16,0,0">
+            <TextBlock x:Name="OfferTrustText" Text="Lain kali langsung terima dari PC ini" FontSize="13" />
+          </CheckBox>
+          <!-- Who sent it, and the two answers. -->
+          <Border Background="{StaticResource DarkTile}" CornerRadius="24" Padding="10,10,10,10" Margin="0,18,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <Border Width="44" Height="44" CornerRadius="22" Background="#333333">
+                <Image Source="{StaticResource ImgLaptop}" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
+              </Border>
+              <StackPanel Grid.Column="1" Margin="12,0,8,0" VerticalAlignment="Center">
+                <TextBlock x:Name="OfferSender" FontSize="15" FontWeight="SemiBold" Foreground="{StaticResource OnInk}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="Pengirim" FontSize="12" Foreground="{StaticResource DarkInk2}" />
+              </StackPanel>
+              <StackPanel Grid.Column="2" Orientation="Horizontal">
+                <Button Style="{StaticResource DarkGhostButton}" Content="Tolak" Padding="20,10" Click="Decline_Click" />
+                <Button x:Name="AcceptButton" Style="{StaticResource AccentButton}" Content="Terima" Padding="24,10" Margin="8,0,0,0" Click="Accept_Click" />
+              </StackPanel>
+            </Grid>
+          </Border>
+        </StackPanel>
+      </Border>
     </Grid>
 
-    <!-- Connection check: what keeps two PCs apart, in plain words, and the one-click fix. -->
+    <!-- Connection check: what keeps two PCs apart, and the one-click fix. -->
     <Grid x:Name="CheckLayer" Grid.RowSpan="2" Background="{StaticResource Scrim}" Visibility="Collapsed">
-      <c:PaperCard Width="640" Fill="{DynamicResource PaperBrush}" Notch="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <StackPanel Margin="32,26,32,28">
+      <Border Width="640" Background="{StaticResource Card}" CornerRadius="26" Padding="28,24,28,26" HorizontalAlignment="Center" VerticalAlignment="Center"
+              Effect="{StaticResource LiftStrong}">
+        <StackPanel>
           <DockPanel>
-            <Button DockPanel.Dock="Right" Style="{StaticResource KraftButton}" Content="Tutup" Click="CloseCheck_Click" VerticalAlignment="Top" />
-            <TextBlock Text="Cek koneksi" FontSize="30" FontWeight="SemiBold" FontStretch="SemiCondensed" />
+            <Button DockPanel.Dock="Right" Style="{StaticResource GhostButton}" Content="Tutup" Click="CloseCheck_Click" VerticalAlignment="Top" />
+            <TextBlock Text="Cek koneksi" FontFamily="{StaticResource Display}" FontSize="26" FontWeight="Bold" />
           </DockPanel>
           <Grid Margin="0,18,0,0">
             <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="110" />
+              <ColumnDefinition Width="58" />
               <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -385,33 +447,43 @@
               <RowDefinition Height="Auto" />
               <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Text="Jaringan" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,3,0,0" />
-            <TextBlock x:Name="CheckNetwork" Grid.Column="1" FontSize="15" TextWrapping="Wrap" />
+            <Image Source="{StaticResource ImgLink}" Width="40" Height="40" VerticalAlignment="Top" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Column="1">
+              <TextBlock Text="Jaringan" FontSize="14.5" FontWeight="SemiBold" />
+              <TextBlock x:Name="CheckNetwork" FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,2,0,0" />
+            </StackPanel>
 
-            <TextBlock Grid.Row="1" Text="Kecepatan" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
-            <TextBlock x:Name="CheckSpeed" Grid.Row="1" Grid.Column="1" FontSize="15" TextWrapping="Wrap" Margin="0,14,0,0" />
+            <Image Grid.Row="1" Source="{StaticResource ImgAntenna}" Width="40" Height="40" Margin="0,18,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,18,0,0">
+              <TextBlock Text="Kecepatan" FontSize="14.5" FontWeight="SemiBold" />
+              <TextBlock x:Name="CheckSpeed" FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,2,0,0" />
+            </StackPanel>
 
-            <TextBlock Grid.Row="2" Text="Firewall" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
-            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,14,0,0">
-              <TextBlock x:Name="CheckFirewall" FontSize="15" TextWrapping="Wrap" />
-              <Button x:Name="CheckFixButton" Style="{StaticResource InkButton}" Content="Izinkan kirimdong" HorizontalAlignment="Left"
+            <Image Grid.Row="2" Source="{StaticResource ImgShield}" Width="40" Height="40" Margin="0,18,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="0,18,0,0">
+              <TextBlock Text="Firewall" FontSize="14.5" FontWeight="SemiBold" />
+              <TextBlock x:Name="CheckFirewall" FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,2,0,0" />
+              <Button x:Name="CheckFixButton" Style="{StaticResource PrimaryButton}" Content="Izinkan kirimdong" HorizontalAlignment="Left"
                       Margin="0,10,0,0" Click="FixFirewall_Click" />
             </StackPanel>
 
-            <TextBlock Grid.Row="3" Text="Pencarian" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,17,0,0" />
-            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,14,0,0">
-              <TextBlock x:Name="CheckDiscovery" FontSize="15" TextWrapping="Wrap" />
-              <Button x:Name="SweepButton" Style="{StaticResource KraftButton}" Content="Pindai jaringan sekarang" HorizontalAlignment="Left"
+            <Image Grid.Row="3" Source="{StaticResource ImgSearch}" Width="40" Height="40" Margin="0,18,0,0" VerticalAlignment="Top" HorizontalAlignment="Left" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Row="3" Grid.Column="1" Margin="0,18,0,0">
+              <TextBlock Text="Pencarian" FontSize="14.5" FontWeight="SemiBold" />
+              <TextBlock x:Name="CheckDiscovery" FontSize="13.5" Foreground="{StaticResource Ink2}" TextWrapping="Wrap" Margin="0,2,0,0" />
+              <Button x:Name="SweepButton" Style="{StaticResource GhostButton}" Content="Pindai jaringan sekarang" HorizontalAlignment="Left"
                       Margin="0,10,0,0" Click="Sweep_Click" />
             </StackPanel>
           </Grid>
-          <TextBlock FontSize="14" TextWrapping="Wrap" Margin="0,22,0,0" LineHeight="21" Foreground="{StaticResource InkOnPaperMuted}">
-            Lakukan cek ini di kedua PC. Kalau firewall keduanya sudah diizinkan tapi tetap tidak saling ketemu, router kemungkinan
-            memisahkan perangkat (client isolation, biasa di Wi-Fi tamu, kantor, atau kampus). Jalan pintasnya: nyalakan Mobile hotspot
-            di salah satu laptop (Settings → Network &amp; internet → Mobile hotspot) lalu sambungkan laptop lain ke hotspot itu.
-          </TextBlock>
+          <Border Background="{StaticResource Tile}" CornerRadius="16" Padding="16,12" Margin="0,22,0,0">
+            <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="19" Foreground="{StaticResource Ink2}">
+              Lakukan cek ini di kedua PC. Kalau firewall keduanya sudah diizinkan tapi tetap tidak saling ketemu, router kemungkinan
+              memisahkan perangkat (client isolation, biasa di Wi-Fi tamu, kantor, atau kampus). Jalan pintasnya: nyalakan Mobile hotspot
+              di salah satu laptop (Settings → Network &amp; internet → Mobile hotspot) lalu sambungkan laptop lain ke hotspot itu.
+            </TextBlock>
+          </Border>
         </StackPanel>
-      </c:PaperCard>
+      </Border>
     </Grid>
   </Grid>
 </Window>

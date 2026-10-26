@@ -102,6 +102,15 @@ internal static class Native
         SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(ex | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_TOPMOST));
     }
 
+    [DllImport("dwmapi.dll")] private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
+
+    /// <summary>Windows 11 rounded corners (and the system shadow) for a borderless popup.</summary>
+    public static void RoundCorners(IntPtr hwnd)
+    {
+        var round = 2; // DWMWCP_ROUND
+        DwmSetWindowAttribute(hwnd, 33 /* DWMWA_WINDOW_CORNER_PREFERENCE */, ref round, sizeof(int));
+    }
+
     public static void Flash(IntPtr hwnd)
     {
         var info = new FLASHWINFO

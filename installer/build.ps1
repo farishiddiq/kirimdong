@@ -37,12 +37,12 @@ function New-Art([string]$path, [int]$w, [int]$h, [bool]$banner) {
     if ($banner) {
         $g.DrawImage($iconImage, $w - 54, 7, 44, 44)
     } else {
-        # Flat kraft panel, like the app: the box, then the name stamped under it.
-        $kraft = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#C69559'))
+        # Soft grey panel, like the app's tiles: the 3D package, then the name.
+        $kraft = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#F1F1F1'))
         $g.FillRectangle($kraft, 0, 0, 164, $h)
         $g.DrawImage($iconImage, 30, 44, 104, 104)
         $ink = New-Object System.Drawing.SolidBrush ([System.Drawing.ColorTranslator]::FromHtml('#0D141A'))
-        $font = New-Object System.Drawing.Font 'Bahnschrift', 19, ([System.Drawing.FontStyle]::Bold)
+        $font = New-Object System.Drawing.Font 'Segoe UI', 17, ([System.Drawing.FontStyle]::Bold)
         $g.DrawString('kirimdong', $font, $ink, 22, 162)
     }
     $g.Dispose()

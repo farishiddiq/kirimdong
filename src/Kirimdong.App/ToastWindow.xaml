@@ -3,38 +3,40 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:c="clr-namespace:Kirimdong.App.Controls"
         Title="kirimdong" WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True"
-        ShowActivated="False" Width="380" Height="196" Background="{StaticResource KraftFlat}"
-        FontFamily="{StaticResource Display}" Foreground="{StaticResource Ink}" UseLayoutRounding="True"
+        ShowActivated="False" Width="380" Height="182" Background="{StaticResource Card}"
+        FontFamily="{StaticResource Text}" Foreground="{StaticResource Ink}" UseLayoutRounding="True" TextOptions.TextRenderingMode="Grayscale"
         MouseEnter="OnMouseEnter" MouseLeave="OnMouseLeave">
-  <!-- A parcel arriving at the edge of the screen it was sent towards, or leaving through it. -->
+  <!-- A shipment card at the screen edge: slides in from the edge the parcel crossed. -->
   <Grid ClipToBounds="True">
-    <c:PaperCard x:Name="Card" Fill="{DynamicResource PaperBrush}" Notch="12" Margin="12" RenderTransformOrigin="0.5,0.5">
-      <c:PaperCard.RenderTransform><TranslateTransform x:Name="Slide" /></c:PaperCard.RenderTransform>
-      <Grid Margin="20,14,16,16">
+    <Border x:Name="Card" Background="{StaticResource Card}" Padding="18,14,14,16">
+      <Border.RenderTransform><TranslateTransform x:Name="Slide" /></Border.RenderTransform>
+      <Grid>
         <Grid.RowDefinitions>
-          <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="Auto" />
           <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <DockPanel>
           <Button DockPanel.Dock="Right" Style="{StaticResource ChromeButton}" Width="30" Height="26" Content="&#xE8BB;"
-                  Focusable="False" Click="Close_Click" ToolTip="Tutup" />
-          <TextBlock x:Name="Heading" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" VerticalAlignment="Center" />
+                  Focusable="False" Click="Close_Click" ToolTip="Tutup" VerticalAlignment="Top" />
+          <Border Width="46" Height="46" CornerRadius="23" Background="{StaticResource Tile}" VerticalAlignment="Top">
+            <Image x:Name="ParcelIcon" Source="{StaticResource ImgEnvelope}" Width="30" Height="30" RenderOptions.BitmapScalingMode="HighQuality" />
+          </Border>
+          <StackPanel Margin="12,0,0,0">
+            <TextBlock x:Name="Heading" FontSize="12.5" Foreground="{StaticResource Ink2}" />
+            <TextBlock x:Name="Peer" FontFamily="{StaticResource Display}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="Summary" FontSize="13" Foreground="{StaticResource Ink2}" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+          </StackPanel>
         </DockPanel>
-        <TextBlock Grid.Row="1" x:Name="Peer" FontFamily="{StaticResource Hand}" FontSize="26" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-        <TextBlock Grid.Row="2" x:Name="Summary" FontSize="15" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
-        <DockPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0,8,0,0">
-          <StackPanel x:Name="Actions" DockPanel.Dock="Right" Orientation="Horizontal" Visibility="Collapsed" Margin="12,0,0,0">
-            <Button Style="{StaticResource InkButton}" Content="Buka" Padding="14,7" Focusable="False" Click="Open_Click" />
-            <Button Style="{StaticResource KraftButton}" Content="Folder" Padding="12,7" Margin="6,0,0,0" Focusable="False" Click="Folder_Click" />
+        <c:DotTrack x:Name="Meter" Grid.Row="1" Margin="0,14,0,8" />
+        <DockPanel Grid.Row="2" VerticalAlignment="Bottom">
+          <StackPanel x:Name="Actions" DockPanel.Dock="Right" Orientation="Horizontal" Visibility="Collapsed" Margin="10,0,0,0">
+            <Button Style="{StaticResource GhostButton}" Content="Folder" Padding="14,7" Focusable="False" Click="Folder_Click" />
+            <Button Style="{StaticResource AccentButton}" Content="Buka" Padding="16,7" Margin="6,0,0,0" Focusable="False" Click="Open_Click" />
           </StackPanel>
-          <StackPanel VerticalAlignment="Center">
-            <ProgressBar x:Name="Meter" Style="{StaticResource Meter}" />
-            <TextBlock x:Name="Status" FontSize="13" Foreground="{StaticResource InkOnPaperMuted}" Margin="0,5,0,0" TextTrimming="CharacterEllipsis" />
-          </StackPanel>
+          <TextBlock x:Name="Status" FontSize="12.5" Foreground="{StaticResource Ink2}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
         </DockPanel>
       </Grid>
-    </c:PaperCard>
+    </Border>
   </Grid>
 </Window>

@@ -1,8 +1,6 @@
 using System;
 using System.Threading;
 using System.Windows;
-using System.Windows.Media;
-using Kirimdong.App.Controls;
 
 namespace Kirimdong.App;
 
@@ -15,6 +13,7 @@ public partial class App : Application
     /// Command line (for testing two copies on one PC):
     ///   --profile NAME   separate settings file and single-instance lock
     ///   --port N         TCP port to receive on (default 47801; falls back to any free port)
+    ///   --discovery-port N  UDP port for finding other copies (default 47800), to keep test copies to themselves
     /// </summary>
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -35,10 +34,12 @@ public partial class App : Application
 
         string? profile = null;
         int? port = null;
+        int? discoveryPort = null;
         for (var i = 0; i < e.Args.Length - 1; i++)
         {
             if (e.Args[i] == "--profile") profile = e.Args[i + 1];
             if (e.Args[i] == "--port" && int.TryParse(e.Args[i + 1], out var p)) port = p;
+            if (e.Args[i] == "--discovery-port" && int.TryParse(e.Args[i + 1], out var d)) discoveryPort = d;
         }
 
         var key = "kirimdong-" + (profile ?? "default");
@@ -52,12 +53,8 @@ public partial class App : Application
         }
         _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, key + "-show");
 
-        Resources["KraftBrush"] = Textures.Kraft((Color)Resources["KraftColor"], 11);
-        Resources["KraftDarkBrush"] = Textures.Kraft((Color)Resources["KraftDarkColor"], 23);
-        Resources["PaperBrush"] = Textures.Paper((Color)Resources["PaperColor"], 5);
-
         base.OnStartup(e);
-        var window = new MainWindow(AppSettings.Load(profile), port);
+        var window = new MainWindow(AppSettings.Load(profile), port, discoveryPort);
         MainWindow = window;
         window.Show();
 

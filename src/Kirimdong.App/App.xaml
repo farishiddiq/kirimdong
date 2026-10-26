@@ -3,99 +3,145 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnMainWindowClose">
   <Application.Resources>
-    <!-- Three inks, like a two-colour print job on brown board: blue-black marker, label paper, sticker orange. -->
-    <Color x:Key="KraftColor">#C69559</Color>
-    <Color x:Key="KraftDarkColor">#AF7F45</Color>
-    <Color x:Key="PaperColor">#FBF9F4</Color>
-    <SolidColorBrush x:Key="Ink" Color="#0D141A" />
-    <SolidColorBrush x:Key="InkOnKraftMuted" Color="#3B2510" />
-    <SolidColorBrush x:Key="InkOnPaperMuted" Color="#4F555B" />
-    <SolidColorBrush x:Key="Accent" Color="#FF6A13" />
-    <SolidColorBrush x:Key="KraftFlat" Color="#C69559" />
-    <SolidColorBrush x:Key="KraftLight" Color="#E7D3B5" />
-    <SolidColorBrush x:Key="KraftLightHover" Color="#DDC29B" />
-    <SolidColorBrush x:Key="PaperFlat" Color="#FBF9F4" />
-    <SolidColorBrush x:Key="TapeBrush" Color="#D8E6C995" />
-    <SolidColorBrush x:Key="Scrim" Color="#B30D141A" />
+    <!-- White ground, soft grey tiles that hold 3D objects, black for actions, one orange for what is moving. -->
+    <SolidColorBrush x:Key="Ground" Color="#FAFAFA" />
+    <SolidColorBrush x:Key="Tile" Color="#F1F1F1" />
+    <SolidColorBrush x:Key="TileHover" Color="#E7E7E7" />
+    <SolidColorBrush x:Key="Card" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Ink" Color="#0A0A0A" />
+    <SolidColorBrush x:Key="Ink2" Color="#6B6B6B" />
+    <SolidColorBrush x:Key="Ink3" Color="#B3B3B3" />
+    <SolidColorBrush x:Key="OnInk" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Accent" Color="#FF6B2C" />
+    <SolidColorBrush x:Key="AccentSoft" Color="#FFE9DF" />
+    <SolidColorBrush x:Key="Dark" Color="#161616" />
+    <SolidColorBrush x:Key="DarkTile" Color="#242424" />
+    <SolidColorBrush x:Key="DarkInk2" Color="#9A9A9A" />
+    <SolidColorBrush x:Key="Scrim" Color="#66000000" />
 
-    <FontFamily x:Key="Display">Bahnschrift</FontFamily>
-    <FontFamily x:Key="Hand">Ink Free</FontFamily>
+    <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+    <FontFamily x:Key="Text">Segoe UI Variable Text, Segoe UI</FontFamily>
     <FontFamily x:Key="Glyphs">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <BitmapImage x:Key="ImgPackage" UriSource="pack://application:,,,/Assets/3d/package.png" />
+    <BitmapImage x:Key="ImgLaptop" UriSource="pack://application:,,,/Assets/3d/laptop.png" />
+    <BitmapImage x:Key="ImgDesktop" UriSource="pack://application:,,,/Assets/3d/desktop_computer.png" />
+    <BitmapImage x:Key="ImgTruck" UriSource="pack://application:,,,/Assets/3d/delivery_truck.png" />
+    <BitmapImage x:Key="ImgFolder" UriSource="pack://application:,,,/Assets/3d/file_folder.png" />
+    <BitmapImage x:Key="ImgAntenna" UriSource="pack://application:,,,/Assets/3d/satellite_antenna.png" />
+    <BitmapImage x:Key="ImgShield" UriSource="pack://application:,,,/Assets/3d/shield.png" />
+    <BitmapImage x:Key="ImgInbox" UriSource="pack://application:,,,/Assets/3d/inbox_tray.png" />
+    <BitmapImage x:Key="ImgEdges" UriSource="pack://application:,,,/Assets/3d/left-right_arrow.png" />
+    <BitmapImage x:Key="ImgSearch" UriSource="pack://application:,,,/Assets/3d/magnifying_glass_tilted_left.png" />
+    <BitmapImage x:Key="ImgEnvelope" UriSource="pack://application:,,,/Assets/3d/incoming_envelope.png" />
+    <BitmapImage x:Key="ImgLink" UriSource="pack://application:,,,/Assets/3d/link.png" />
+
+    <DropShadowEffect x:Key="Lift" BlurRadius="36" ShadowDepth="6" Direction="270" Opacity="0.10" Color="#000000" />
+    <DropShadowEffect x:Key="LiftStrong" BlurRadius="60" ShadowDepth="14" Direction="270" Opacity="0.28" Color="#000000" />
 
     <Style x:Key="Focus">
       <Setter Property="Control.Template">
         <Setter.Value>
           <ControlTemplate>
-            <Rectangle Margin="-3" Stroke="{StaticResource Accent}" StrokeThickness="2" SnapsToDevicePixels="True" />
+            <Rectangle Margin="-3" RadiusX="14" RadiusY="14" Stroke="{StaticResource Accent}" StrokeThickness="2" />
           </ControlTemplate>
         </Setter.Value>
       </Setter>
     </Style>
 
-    <!-- The one action shape: a square block of ink with orange type; hover swaps the two. -->
-    <Style x:Key="InkButton" TargetType="Button">
+    <!-- Pill buttons: black for the main action, orange to accept, grey or white for the rest. -->
+    <Style x:Key="PrimaryButton" TargetType="Button">
       <Setter Property="Background" Value="{StaticResource Ink}" />
-      <Setter Property="Foreground" Value="{StaticResource Accent}" />
-      <Setter Property="FontFamily" Value="{StaticResource Display}" />
+      <Setter Property="Foreground" Value="{StaticResource OnInk}" />
+      <Setter Property="FontFamily" Value="{StaticResource Text}" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="FontSize" Value="15" />
-      <Setter Property="Padding" Value="16,9" />
+      <Setter Property="FontSize" Value="13.5" />
+      <Setter Property="Padding" Value="18,9" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
-      <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-      <Setter Property="RenderTransform"><Setter.Value><TranslateTransform /></Setter.Value></Setter>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="b" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+            <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="999" Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Opacity" Value="0.85" />
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="RenderTransform"><Setter.Value><ScaleTransform ScaleX="0.96" ScaleY="0.96" /></Setter.Value></Setter>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="b" Property="Opacity" Value="0.4" />
+              </Trigger>
+            </ControlTemplate.Triggers>
           </ControlTemplate>
         </Setter.Value>
       </Setter>
-      <Style.Triggers>
-        <Trigger Property="IsMouseOver" Value="True">
-          <Setter Property="Background" Value="{StaticResource Accent}" />
-          <Setter Property="Foreground" Value="{StaticResource Ink}" />
-        </Trigger>
-        <Trigger Property="IsPressed" Value="True">
-          <Setter Property="RenderTransform"><Setter.Value><TranslateTransform Y="1" /></Setter.Value></Setter>
-        </Trigger>
-        <Trigger Property="IsEnabled" Value="False">
-          <Setter Property="Opacity" Value="0.45" />
-        </Trigger>
-      </Style.Triggers>
     </Style>
 
-    <Style x:Key="KraftButton" TargetType="Button" BasedOn="{StaticResource InkButton}">
-      <Setter Property="Background" Value="{StaticResource KraftLight}" />
+    <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+      <Setter Property="Background" Value="{StaticResource Accent}" />
+    </Style>
+
+    <Style x:Key="GhostButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+      <Setter Property="Background" Value="{StaticResource Tile}" />
       <Setter Property="Foreground" Value="{StaticResource Ink}" />
-      <Style.Triggers>
-        <Trigger Property="IsMouseOver" Value="True">
-          <Setter Property="Background" Value="{StaticResource KraftLightHover}" />
-          <Setter Property="Foreground" Value="{StaticResource Ink}" />
-        </Trigger>
-        <Trigger Property="IsPressed" Value="True">
-          <Setter Property="RenderTransform"><Setter.Value><TranslateTransform Y="1" /></Setter.Value></Setter>
-        </Trigger>
-      </Style.Triggers>
     </Style>
 
-    <!-- Words that act, set in the text face and underlined. -->
+    <Style x:Key="WhiteButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+      <Setter Property="Background" Value="{StaticResource Card}" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+    </Style>
+
+    <Style x:Key="DarkGhostButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+      <Setter Property="Background" Value="#343434" />
+      <Setter Property="Foreground" Value="{StaticResource OnInk}" />
+    </Style>
+
+    <!-- Quiet words that act, like "See All". -->
     <Style x:Key="WordButton" TargetType="Button">
-      <Setter Property="Foreground" Value="{StaticResource Ink}" />
-      <Setter Property="FontFamily" Value="{StaticResource Display}" />
-      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Foreground" Value="{StaticResource Ink2}" />
+      <Setter Property="FontFamily" Value="{StaticResource Text}" />
+      <Setter Property="FontSize" Value="13" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <TextBlock x:Name="t" Text="{TemplateBinding Content}" TextDecorations="Underline" Background="Transparent" />
+            <TextBlock x:Name="t" Text="{TemplateBinding Content}" Background="Transparent" Foreground="{TemplateBinding Foreground}" />
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="t" Property="Foreground" Value="{StaticResource Accent}" />
-                <Setter TargetName="t" Property="Background" Value="{StaticResource Ink}" />
+                <Setter TargetName="t" Property="Foreground" Value="{StaticResource Ink}" />
+                <Setter TargetName="t" Property="TextDecorations" Value="Underline" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- A grey tile that is itself the button (service tile). -->
+    <Style x:Key="TileButton" TargetType="Button">
+      <Setter Property="Background" Value="{StaticResource Tile}" />
+      <Setter Property="Foreground" Value="{StaticResource Ink}" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+      <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="b" Background="{TemplateBinding Background}" CornerRadius="18" Padding="{TemplateBinding Padding}" RenderTransformOrigin="0.5,0.5">
+              <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="b" Property="Background" Value="{StaticResource TileHover}" />
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="b" Property="RenderTransform"><Setter.Value><ScaleTransform ScaleX="0.98" ScaleY="0.98" /></Setter.Value></Setter>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -123,7 +169,7 @@
       </Setter>
       <Style.Triggers>
         <Trigger Property="IsMouseOver" Value="True">
-          <Setter Property="Background" Value="#33000000" />
+          <Setter Property="Background" Value="{StaticResource Tile}" />
         </Trigger>
       </Style.Triggers>
     </Style>
@@ -131,65 +177,61 @@
     <Style x:Key="CloseButton" TargetType="Button" BasedOn="{StaticResource ChromeButton}">
       <Style.Triggers>
         <Trigger Property="IsMouseOver" Value="True">
-          <Setter Property="Background" Value="{StaticResource Ink}" />
-          <Setter Property="Foreground" Value="{StaticResource Accent}" />
+          <Setter Property="Background" Value="#C42B1C" />
+          <Setter Property="Foreground" Value="White" />
         </Trigger>
       </Style.Triggers>
     </Style>
 
+    <!-- Borderless text field, placed inside a pill. -->
     <Style x:Key="Field" TargetType="TextBox">
-      <Setter Property="Background" Value="{StaticResource PaperFlat}" />
+      <Setter Property="Background" Value="Transparent" />
       <Setter Property="Foreground" Value="{StaticResource Ink}" />
       <Setter Property="CaretBrush" Value="{StaticResource Ink}" />
       <Setter Property="SelectionBrush" Value="{StaticResource Accent}" />
-      <Setter Property="FontFamily" Value="{StaticResource Display}" />
-      <Setter Property="FontSize" Value="15" />
-      <Setter Property="Padding" Value="10,8" />
-      <Setter Property="BorderThickness" Value="0,0,0,2" />
-      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="FontFamily" Value="{StaticResource Text}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="TextBox">
-            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-              <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
-            </Border>
+            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center" Background="Transparent" />
           </ControlTemplate>
         </Setter.Value>
       </Setter>
-      <Style.Triggers>
-        <Trigger Property="IsKeyboardFocused" Value="True">
-          <Setter Property="BorderBrush" Value="{StaticResource Accent}" />
-        </Trigger>
-      </Style.Triggers>
     </Style>
 
-    <Style x:Key="Tick" TargetType="CheckBox">
+    <!-- On/off switch: grey track, black when on. -->
+    <Style x:Key="Switch" TargetType="CheckBox">
       <Setter Property="Foreground" Value="{StaticResource Ink}" />
-      <Setter Property="FontFamily" Value="{StaticResource Display}" />
-      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontFamily" Value="{StaticResource Text}" />
+      <Setter Property="FontSize" Value="13" />
       <Setter Property="Cursor" Value="Hand" />
       <Setter Property="FocusVisualStyle" Value="{StaticResource Focus}" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="CheckBox">
-            <Grid Background="Transparent">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-              </Grid.ColumnDefinitions>
-              <Border x:Name="box" Width="22" Height="22" Background="{StaticResource KraftLight}" VerticalAlignment="Top" Margin="0,1,0,0">
-                <Path x:Name="mark" Data="M 5,11 L 9.5,15.5 L 17,6.5" Stroke="{StaticResource Accent}" StrokeThickness="3"
-                      StrokeEndLineCap="Round" StrokeStartLineCap="Round" StrokeLineJoin="Round" Visibility="Collapsed" />
+            <DockPanel Background="Transparent">
+              <Border x:Name="track" DockPanel.Dock="Right" Width="40" Height="24" CornerRadius="12" Background="#D0D0D0" VerticalAlignment="Center" Margin="10,0,0,0">
+                <Ellipse Width="18" Height="18" Fill="White" HorizontalAlignment="Left" Margin="3,0,0,0">
+                  <Ellipse.RenderTransform><TranslateTransform x:Name="slide" /></Ellipse.RenderTransform>
+                </Ellipse>
               </Border>
-              <ContentPresenter Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" />
-            </Grid>
+              <ContentPresenter VerticalAlignment="Center" />
+            </DockPanel>
             <ControlTemplate.Triggers>
               <Trigger Property="IsChecked" Value="True">
-                <Setter TargetName="box" Property="Background" Value="{StaticResource Ink}" />
-                <Setter TargetName="mark" Property="Visibility" Value="Visible" />
-              </Trigger>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="box" Property="Opacity" Value="0.85" />
+                <Setter TargetName="track" Property="Background" Value="{StaticResource Ink}" />
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard><DoubleAnimation Storyboard.TargetName="slide" Storyboard.TargetProperty="X" To="16" Duration="0:0:0.15" /></Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard><DoubleAnimation Storyboard.TargetName="slide" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.15" /></Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
               </Trigger>
             </ControlTemplate.Triggers>
           </ControlTemplate>
@@ -197,9 +239,51 @@
       </Setter>
     </Style>
 
+    <!-- The same switch on the dark sheet: orange when on. -->
+    <Style x:Key="DarkSwitch" TargetType="CheckBox" BasedOn="{StaticResource Switch}">
+      <Setter Property="Foreground" Value="{StaticResource OnInk}" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CheckBox">
+            <DockPanel Background="Transparent">
+              <Border x:Name="track" DockPanel.Dock="Right" Width="40" Height="24" CornerRadius="12" Background="#3C3C3C" VerticalAlignment="Center" Margin="10,0,0,0">
+                <Ellipse Width="18" Height="18" Fill="White" HorizontalAlignment="Left" Margin="3,0,0,0">
+                  <Ellipse.RenderTransform><TranslateTransform x:Name="slide" /></Ellipse.RenderTransform>
+                </Ellipse>
+              </Border>
+              <ContentPresenter VerticalAlignment="Center" />
+            </DockPanel>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="track" Property="Background" Value="{StaticResource Accent}" />
+                <Trigger.EnterActions>
+                  <BeginStoryboard>
+                    <Storyboard><DoubleAnimation Storyboard.TargetName="slide" Storyboard.TargetProperty="X" To="16" Duration="0:0:0.15" /></Storyboard>
+                  </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                  <BeginStoryboard>
+                    <Storyboard><DoubleAnimation Storyboard.TargetName="slide" Storyboard.TargetProperty="X" To="0" Duration="0:0:0.15" /></Storyboard>
+                  </BeginStoryboard>
+                </Trigger.ExitActions>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- Status pill, like "Transit" / "Delivered". -->
+    <Style x:Key="Badge" TargetType="Border">
+      <Setter Property="Background" Value="{StaticResource Tile}" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="Padding" Value="11,4" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+
     <Style TargetType="ScrollBar">
-      <Setter Property="Width" Value="8" />
-      <Setter Property="MinWidth" Value="8" />
+      <Setter Property="Width" Value="6" />
+      <Setter Property="MinWidth" Value="6" />
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="ScrollBar">
@@ -208,30 +292,12 @@
                 <Thumb>
                   <Thumb.Template>
                     <ControlTemplate TargetType="Thumb">
-                      <Border Background="#990D141A" />
+                      <Border Background="#2E000000" CornerRadius="3" />
                     </ControlTemplate>
                   </Thumb.Template>
                 </Thumb>
               </Track.Thumb>
             </Track>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
-
-    <Style x:Key="Meter" TargetType="ProgressBar">
-      <Setter Property="Height" Value="10" />
-      <Setter Property="Minimum" Value="0" />
-      <Setter Property="Maximum" Value="1" />
-      <Setter Property="Background" Value="{StaticResource KraftLight}" />
-      <Setter Property="Foreground" Value="{StaticResource Ink}" />
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="ProgressBar">
-            <Grid>
-              <Border x:Name="PART_Track" Background="{TemplateBinding Background}" />
-              <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" HorizontalAlignment="Left" />
-            </Grid>
           </ControlTemplate>
         </Setter.Value>
       </Setter>

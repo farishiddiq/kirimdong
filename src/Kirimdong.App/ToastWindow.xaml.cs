@@ -31,7 +31,10 @@ public partial class ToastWindow : Window
     {
         InitializeComponent();
         _item = item;
-        Native.MakeNoActivate(new WindowInteropHelper(this).EnsureHandle());
+        var hwnd = new WindowInteropHelper(this).EnsureHandle();
+        Native.MakeNoActivate(hwnd);
+        Native.RoundCorners(hwnd);
+        if (item.IsSend) ParcelIcon.Source = (System.Windows.Media.ImageSource)Application.Current.Resources["ImgPackage"];
         Heading.Text = item.IsSend ? "Mengirim ke" : "Paket masuk dari";
         Peer.Text = item.PeerName;
         Summary.Text = item.Summary;
@@ -52,10 +55,10 @@ public partial class ToastWindow : Window
         int x, y;
         switch (edge)
         {
-            case "left": x = m.Left; y = m.Top + (m.Height - h) / 2; break;
-            case "top": x = m.Left + (m.Width - w) / 2; y = m.Top; break;
+            case "left": x = m.Left + 12; y = m.Top + (m.Height - h) / 2; break;
+            case "top": x = m.Left + (m.Width - w) / 2; y = m.Top + 12; break;
             case "bottom": x = m.Left + (m.Width - w) / 2; y = m.Bottom - h - 48; break; // above the taskbar
-            default: x = m.Right - w; y = m.Top + (m.Height - h) / 2; break;
+            default: x = m.Right - w - 12; y = m.Top + (m.Height - h) / 2; break;
         }
         Native.SetWindowPos(new WindowInteropHelper(this).Handle, Native.HWND_TOPMOST, x, y, w, h, Native.SWP_NOACTIVATE | Native.SWP_SHOWWINDOW);
 
@@ -71,7 +74,8 @@ public partial class ToastWindow : Window
         Meter.Value = _item.Progress;
         Status.Text = _item.Status;
         var t = _item.Transfer;
-        Meter.Foreground = (Brush)Application.Current.Resources[t.State == TransferState.Done ? "Accent" : "Ink"];
+        Meter.IsDone = _item.IsDone;
+        Meter.IsProblem = _item.IsProblem;
         if (t.IsActive) return;
 
         _finishedAt ??= DateTime.UtcNow;

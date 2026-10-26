@@ -12,13 +12,12 @@ namespace Kirimdong.App;
 /// </summary>
 public partial class PortalWindow : Window
 {
-    private readonly Brush _paper;
-
     public PortalWindow()
     {
         InitializeComponent();
-        _paper = Card.Fill;
-        Native.MakeNoActivate(new WindowInteropHelper(this).EnsureHandle());
+        var hwnd = new WindowInteropHelper(this).EnsureHandle();
+        Native.MakeNoActivate(hwnd);
+        Native.RoundCorners(hwnd);
     }
 
     /// <summary>Raised with the dropped paths; the portal hides itself first.</summary>
@@ -63,7 +62,11 @@ public partial class PortalWindow : Window
 
     private void SetHot(bool hot)
     {
-        Card.Fill = hot ? (Brush)Application.Current.Resources["Accent"] : _paper;
+        var res = Application.Current.Resources;
+        Card.Background = (Brush)res[hot ? "Accent" : "Dark"];
+        Background = Card.Background;
+        Arrow.Foreground = (Brush)res[hot ? "OnInk" : "Accent"];
+        Prompt.Foreground = (Brush)res[hot ? "OnInk" : "DarkInk2"];
         Prompt.Text = hot ? "Lepas sekarang, terkirim ke" : "Lepas di sini untuk kirim ke";
         Hint.Visibility = hot ? Visibility.Collapsed : Visibility.Visible;
     }

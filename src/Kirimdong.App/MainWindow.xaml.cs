@@ -38,13 +38,12 @@ public partial class MainWindow : Window
     private ConnectionReport? _report;
     private bool _loaded;
 
-    public MainWindow(AppSettings settings, int? port)
+    public MainWindow(AppSettings settings, int? port, int? discoveryPort = null)
     {
         _settings = settings;
         InitializeComponent();
 
         NameBox.Text = settings.DeviceName;
-        MyBarcode.Code = settings.DeviceId;
         SaveFolderText.Text = settings.SaveFolder;
         SaveFolderText.ToolTip = settings.SaveFolder;
         AutoAcceptBox.IsChecked = settings.AutoAccept;
@@ -58,7 +57,7 @@ public partial class MainWindow : Window
         try { _server.Start(port ?? Protocol.DefaultTcpPort); }
         catch (SocketException) { _server.Start(0); } // port taken: any free port works, discovery tells others which
 
-        _discovery = new DiscoveryService(Identity);
+        _discovery = new DiscoveryService(Identity, discoveryPort ?? Protocol.DiscoveryPort);
         _discovery.PeersChanged += () => Dispatcher.BeginInvoke(SyncPeers);
         _discovery.SweepStateChanged += () => Dispatcher.BeginInvoke(SyncPeers);
         _discovery.Start();
@@ -425,13 +424,12 @@ public partial class MainWindow : Window
             if (!next.IsOpen) continue;
             _currentOffer = next;
             OfferSender.Text = next.SenderName;
-            OfferBarcode.Code = next.Offer.Offer.SenderId;
             OfferSummary.Text = next.Summary;
             OfferSize.Text = $"{next.Size}  ·  dari {next.From}";
             OfferFiles.ItemsSource = next.Preview;
             OfferMore.Text = next.More;
             OfferMore.Visibility = next.More.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
-            OfferFolder.Text = $"Disimpan ke {next.SaveFolder}";
+            OfferFolder.Text = next.SaveFolder;
             OfferCountdown.Text = next.Countdown;
             OfferTrust.IsChecked = false;
             OfferTrustText.Text = $"Lain kali langsung terima dari {next.SenderName}";

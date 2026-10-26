@@ -112,6 +112,7 @@ public sealed class TransferItem : Observable
     public Transfer Transfer { get; }
     public bool IsSend => Transfer.Direction == TransferDirection.Send;
     public string Direction => IsSend ? "Ke" : "Dari";
+    public string Route => IsSend ? $"Ke {Transfer.PeerName}" : $"Dari {Transfer.PeerName}";
     public string PeerName => Transfer.PeerName;
     public string Summary => $"{Transfer.Summary} · {Units.Bytes(Transfer.TotalBytes)}";
     public double Progress => Transfer.TotalBytes == 0
@@ -122,6 +123,17 @@ public sealed class TransferItem : Observable
     public bool IsProblem => Transfer.State is TransferState.Failed or TransferState.Declined or TransferState.Canceled;
     public bool CanOpen => !IsSend && IsDone;
     public bool CanDismiss => !IsActive;
+
+    /// <summary>One word for the status pill.</summary>
+    public string Badge => Transfer.State switch
+    {
+        TransferState.Waiting => "Menunggu",
+        TransferState.Running => IsSend ? "Mengirim" : "Menerima",
+        TransferState.Done => IsSend ? "Terkirim" : "Diterima",
+        TransferState.Declined => "Ditolak",
+        TransferState.Canceled => "Dibatalkan",
+        _ => "Gagal",
+    };
 
     public string Status => Transfer.State switch
     {
@@ -167,6 +179,7 @@ public sealed class TransferItem : Observable
     {
         Raise(nameof(Progress));
         Raise(nameof(Status));
+        Raise(nameof(Badge));
         Raise(nameof(IsActive));
         Raise(nameof(IsDone));
         Raise(nameof(IsProblem));
