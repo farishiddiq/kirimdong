@@ -1,0 +1,14 @@
+Update kirimdong 1.3 📦
+
+Dua laptop di Wi-Fi yang sama kadang ga saling ketemu. Ternyata biang keroknya firewall Windows. Sekarang kirimdong ngasih tahu dan bisa benerin sekali klik.
+
+Yang baru:
+• Seret file ke tepi layar, langsung nyampe di laptop sebelah
+• Tampilan baru, font Inter
+• Transfer lebih cepat
+• Cek koneksi: firewall, Wi-Fi, pindai jaringan
+
+Gratis & open source:
+github.com/farishiddiq/kirimdong
+
+Kabari kalau masih ada yang ga jalan ya 🙏
